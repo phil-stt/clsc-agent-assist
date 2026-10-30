@@ -1,0 +1,40 @@
+{
+  "prompt": {
+    "model": "claude-opus-5-5",
+    "version": "extract-v1",
+    "system": "You read one document from an insurance agency's knowledge corpus (a policy form summary, a product sheet, or a statute excerpt) and propose relationships for the agency's knowledge graph.\n\nYou get the edge types you may propose, each with the node types it connects, and the catalog of nodes that already exist. Propose an edge only when this document states the relationship. Use only node ids from the catalog. Don't propose edges the document merely makes plausible.\n\nFor each edge give:\n- condition: the condition the document attaches to it, in a short phrase, or \"\" if none.\n- evidence: a short exact quote from the document that states it.\n\nA person reviews every proposal before it enters the graph. Fewer, well-evidenced edges beat many guesses. Return an empty list if the document states none.",
+    "user": "Edge types:\n- ADDRESSED_BY: Exposure -> Product\n- APPLIES_IN: Rule -> State\n- EXEMPT_WHEN: Disclosure -> Rule\n- MANDATES: State -> Disclosure\n- OFFERED_BY: Product -> Carrier\n- PLACED_IN: Product -> Market\n- SATISFIES: Form -> ContractRequirement\n- TRIGGERS: Market -> Disclosure\n\nNode catalog:\n- carrier:coastline-auto (Carrier): Coastline Auto Insurance Co.\n- carrier:harborline-specialty (Carrier): Harborline Specialty Insurance Co.\n- carrier:meridian-surplus (Carrier): Meridian Surplus Underwriters\n- carrier:tri-valley-comp (Carrier): Tri-Valley Compensation Mutual\n- carrier:westbrook-mutual (Carrier): Westbrook Mutual\n- disclosure:ca-broker-fee (Disclosure): Broker fee disclosure\n- disclosure:ca-d1 (Disclosure): California surplus lines disclosure (D-1)\n- disclosure:ca-recorded-line (Disclosure): Recorded-line notice\n- exposure:cyber (Exposure): Network security and privacy\n- exposure:non-owned-auto (Exposure): Hired and non-owned autos\n- exposure:professional-services (Exposure): Professional services (design, specifications, drawings)\n- form:CG2001 (Form): CG 20 01\n- form:CG2010 (Form): CG 20 10\n- form:CG2033 (Form): CG 20 33\n- form:CG2037 (Form): CG 20 37\n- form:CG2279 (Form): CG 22 79\n- form:CG2404 (Form): CG 24 04\n- market:ca-admitted (Market): Admitted (California)\n- market:ca-non-admitted (Market): Non-admitted / surplus lines (California)\n- product:cgl (Product): Commercial General Liability\n- product:cpl (Product): Contractors Professional Liability\n- product:cyber (Product): Cyber Liability\n- product:hnoa (Product): Hired and Non-Owned Auto\n- product:umbrella (Product): Commercial Umbrella\n- req:ai-completed (ContractRequirement): Additional insured, completed operations\n- req:ai-ongoing (ContractRequirement): Additional insured, ongoing operations\n- req:primary-noncontributory (ContractRequirement): Primary and noncontributory\n- req:waiver-subrogation (ContractRequirement): Waiver of subrogation\n- rule:ca-industrial-insured (Rule): Industrial insured exemption from the D-1 signature\n- rule:certificate-representation (Rule): A certificate may only show what the policy's attached forms support\n- state:CA (State): California\n\nDocument (docs/statutes/ca-ins-1764-1.md):\n\n# Cal. Ins. Code \u00a71764.1: surplus lines disclosure (excerpt)\n*Public statutory text. Source: FindLaw copy of the California Insurance Code, current as of 2026-01-01. Verify against leginfo.legislature.ca.gov.*\n\n**(a)(1), in part:** \"... at the time of accepting an application for an insurance policy, other than a renewal of that policy, issued by a nonadmitted insurer, the signature of the applicant on the disclosure statement set forth in subdivision (b) is obtained.\"\n\n**(a)(2):** \"In a case in which the applicant has not received and completed the signed disclosure form required by this section, the applicant may cancel the insurance so placed. The cancellation shall be on a pro rata basis as to premium, and the applicant shall be entitled to the return of any broker's fees charged for the placement.\"\n\n**(b):** the notice itself; see `knowledge/disclosures/ca-d1.md` for the verbatim text.\n\n**(c)(1):** \"An industrial insured is an insured that does both of the following: (A) Employs at least 25 employees on average during the prior 12 months. (B) Has aggregate annual premiums for insurance for all risks other than workers' compensation and health coverage totaling no less than twenty-five thousand dollars ($25,000) or obtains insurance through the services of a full-time employee acting as an insurance manager or a continuously retained insurance consultant.\" For an industrial insured, the notice goes on the confirmation, certificate of placement or policy, and no signature is required.\n\nProduct requiring it: any product placed with a nonadmitted insurer for a California home-state insured.\n"
+  },
+  "result": {
+    "edges": [
+      {
+        "type": "TRIGGERS",
+        "from": "market:ca-non-admitted",
+        "to": "disclosure:ca-d1",
+        "condition": "new applications, not renewals",
+        "evidence": "at the time of accepting an application for an insurance policy, other than a renewal of that policy, issued by a nonadmitted insurer, the signature of the applicant on the disclosure statement"
+      },
+      {
+        "type": "MANDATES",
+        "from": "state:CA",
+        "to": "disclosure:ca-d1",
+        "condition": "nonadmitted placement for California home-state insured",
+        "evidence": "any product placed with a nonadmitted insurer for a California home-state insured"
+      },
+      {
+        "type": "EXEMPT_WHEN",
+        "from": "disclosure:ca-d1",
+        "to": "rule:ca-industrial-insured",
+        "condition": "signature only; notice still goes on confirmation, certificate or policy",
+        "evidence": "For an industrial insured, the notice goes on the confirmation, certificate of placement or policy, and no signature is required."
+      },
+      {
+        "type": "APPLIES_IN",
+        "from": "rule:ca-industrial-insured",
+        "to": "state:CA",
+        "condition": "",
+        "evidence": "An industrial insured is an insured that does both of the following"
+      }
+    ]
+  }
+}

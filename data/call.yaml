@@ -1,0 +1,84 @@
+# SYNTHETIC CALL. Simulated call. Scripted transcript stands in for live speech-to-text.
+# Every person, company and figure in it is fictional.
+#
+# Each beat has the line as spoken and a `scripted` detection: what the model is
+# expected to pull from the line. The app asks Claude first (cached in
+# data/llm_cache/); the scripted value is the offline fallback, labeled as such.
+
+call:
+  id: reyes-coi-2026-10-29
+  agent: Dana Whitfield, commercial lines account manager (fictional)
+  client: client:reyes-design-build
+  contract: contract:larchmont-msa
+  caller: Marisol Reyes, owner, Reyes Design Build (fictional)
+  date: "2026-10-29"
+  # The co-pilot's proposed follow-up: she reviews over the weekend, the agent checks back after.
+  follow_up: "2026-11-03"
+  follow_up_label: "Tuesday, November 3, 2026"
+
+beats:
+  - n: 1
+    t: "00:00"
+    speaker: agent
+    text: "Pacific Crest Insurance Services, this is Dana."
+    scripted: {intent: greeting, call_type: none, requirements: [], locations: [], exposures: [], evidence: "Pacific Crest Insurance Services, this is Dana."}
+
+  - n: 2
+    t: "00:24"
+    speaker: client
+    text: "Hi Dana, it's Marisol Reyes over at Reyes Design Build."
+    scripted: {intent: identify, call_type: none, requirements: [], locations: [], exposures: [], evidence: "Marisol Reyes over at Reyes Design Build"}
+
+  - n: 3
+    t: "00:41"
+    speaker: client
+    text: "I need a COI by Monday. We just signed with Larchmont Property Group, they manage a bunch of office buildings, and my crew can't start until they have it. Their contract says they want to be additional insured for ongoing and completed operations, primary and noncontributory, and a waiver of subrogation."
+    scripted: {intent: certificate_request, call_type: certificate_request, requirements: [req:ai-ongoing, req:ai-completed, req:primary-noncontributory, req:waiver-subrogation], locations: [], exposures: [], evidence: "additional insured for ongoing and completed operations, primary and noncontributory, and a waiver of subrogation"}
+
+  - n: 4
+    t: "01:35"
+    speaker: agent
+    text: "Okay. Give me one second, I'm going to pull up your general liability and look at what's actually attached to it before I put anything on a certificate."
+    scripted: {intent: forms_review, call_type: certificate_request, requirements: [], locations: [], exposures: [], evidence: "look at what's actually attached to it"}
+
+  - n: 5
+    t: "02:20"
+    speaker: client
+    text: "Can you just send it over today? Every other agent I've had sends these in five minutes."
+    scripted: {intent: client_pressure, call_type: certificate_request, requirements: [], locations: [], exposures: [], evidence: "Can you just send it over today?"}
+
+  - n: 6
+    t: "04:05"
+    speaker: client
+    text: "Okay, that makes sense. Oh, and while I have you, we leased a yard in Vernon last month. We keep the equipment and the trailers there now."
+    scripted: {intent: location_change, call_type: certificate_request, requirements: [], locations: [{name: "Yard, Vernon", when: "last month"}], exposures: [], evidence: "we leased a yard in Vernon last month"}
+
+  - n: 7
+    t: "05:25"
+    speaker: client
+    text: "And we've started doing some of the design in-house now. We hired an architect in August so we can bid design-build jobs ourselves."
+    scripted: {intent: operations_change, call_type: certificate_request, requirements: [], locations: [], exposures: [exposure:professional-services], evidence: "we've started doing some of the design in-house now"}
+
+  - n: 8
+    t: "06:50"
+    speaker: agent
+    text: "That's a big change, and your general liability won't respond to a design error. There's a policy built for exactly that. Let me get you a quote on contractors professional liability."
+    scripted: {intent: quote_request, call_type: certificate_request, requirements: [], locations: [], exposures: [exposure:professional-services], evidence: "Let me get you a quote on contractors professional liability."}
+
+  - n: 9
+    t: "08:10"
+    speaker: client
+    text: "Sure, go ahead and get me a number."
+    scripted: {intent: quote_request, call_type: certificate_request, requirements: [], locations: [], exposures: [], evidence: "go ahead and get me a number"}
+
+  - n: 10
+    t: "09:20"
+    speaker: client
+    text: "Actually, let me think about it. Can you send me something in writing and I'll look at it this weekend?"
+    scripted: {intent: decline, call_type: certificate_request, requirements: [], locations: [], exposures: [], evidence: "let me think about it"}
+
+  - n: 11
+    t: "10:35"
+    speaker: agent
+    text: "Of course. I'll send the endorsement request to Westbrook today, add the Vernon yard, and email you a summary with the professional liability information. I'll check back with you Tuesday."
+    scripted: {intent: wrap, call_type: certificate_request, requirements: [], locations: [], exposures: [], evidence: "I'll send the endorsement request to Westbrook today"}

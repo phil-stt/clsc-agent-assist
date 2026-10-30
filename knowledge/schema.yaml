@@ -1,0 +1,48 @@
+# The curated schema (approach C). Small on purpose: the entity types and the
+# edges that carry compliance meaning. Extraction may only propose edges whose
+# type appears here; anything flagged requires_approval waits for a person.
+
+entities:
+  Agency: {}
+  Client: {}
+  Location: {}
+  Policy: {}
+  Coverage: {}
+  Form: {description: "An endorsement or coverage form attached to a policy (ISO number)."}
+  Carrier: {}
+  Market: {description: "Admitted or non-admitted, scoped by state."}
+  Product: {}
+  Industry: {description: "NAICS code."}
+  State: {}
+  Rule: {}
+  Disclosure: {description: "Verbatim text owned by compliance, read from knowledge/disclosures/."}
+  Contract: {description: "A third party's contract that sets insurance requirements (added for WO-001: the requirements need an owner)."}
+  ContractRequirement: {}
+  Exposure: {description: "A loss exposure a coverage may exclude and a product may address."}
+  UnderwritingFact: {description: "A statement from the underwriting file, with an as_of date."}
+
+edges:
+  # Compliance-bearing: extraction proposes, a person approves.
+  SATISFIES:    {from: Form,        to: ContractRequirement, requires_approval: true}
+  PLACED_IN:    {from: Product,     to: Market,              requires_approval: true, scoped_by: [State, Industry]}
+  TRIGGERS:     {from: Market,      to: Disclosure,          requires_approval: true, scoped_by: [State]}
+  EXEMPT_WHEN:  {from: Disclosure,  to: Rule,                requires_approval: true}
+  EXCLUDES:     {from: Coverage,    to: Exposure,            requires_approval: true}
+  ADDRESSED_BY: {from: Exposure,    to: Product,             requires_approval: true}
+  APPLIES_IN:   {from: Rule,        to: State,               requires_approval: true}
+  MANDATES:     {from: State,       to: Disclosure,          requires_approval: true}
+
+  # Plain data: loads straight in from the AMS (here, the seed YAML).
+  HAS:          {from: Client,      to: Policy,              requires_approval: false}
+  ATTACHES:     {from: Policy,      to: Form,                requires_approval: false}
+  HAS_COVERAGE: {from: Policy,      to: Coverage,            requires_approval: false}
+  WRITTEN_BY:   {from: Policy,      to: Carrier,             requires_approval: false}
+  OPERATES_AT:  {from: Client,      to: Location,            requires_approval: false}
+  COVERS:       {from: Policy,      to: Location,            requires_approval: false}
+  IN:           {from: Client,      to: Industry,            requires_approval: false}
+  HOME_STATE:   {from: Client,      to: State,               requires_approval: false}
+  ABOUT:        {from: UnderwritingFact, to: Client,         requires_approval: false}
+  SERVICED_BY:  {from: Client,      to: Agency,              requires_approval: false}
+  REQUIRES:     {from: Contract,    to: ContractRequirement, requires_approval: false}
+  PARTY_TO:     {from: Client,      to: Contract,            requires_approval: false}
+  OFFERED_BY:   {from: Product,     to: Carrier,             requires_approval: false}
