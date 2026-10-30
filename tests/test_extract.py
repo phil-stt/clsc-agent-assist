@@ -7,6 +7,7 @@ from knowledge import extract
 def test_extract_writes_a_checked_non_empty_queue(tmp_path, monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.setattr(extract, "OUT", tmp_path / "proposed_edges.json")
+    monkeypatch.setenv("CLSC_APPROVALS", str(tmp_path / "approvals.json"))
     out = extract.run(allow_live=False)
     assert out["responses"] == {"claude-cached": out["documents"]}
     props = json.loads((tmp_path / "proposed_edges.json").read_text())["proposals"]

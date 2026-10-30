@@ -377,3 +377,13 @@ def certificate_check(g: nx.MultiDiGraph, client: str, contract: str) -> Answer:
 
 def cq7_certificate(g: nx.MultiDiGraph, client: str, contract: str) -> Answer:
     return certificate_check(g, client, contract)
+
+
+def provenance(g: nx.MultiDiGraph, path: Path) -> list[dict]:
+    """Review provenance for every edge on a path that came in through the review screen."""
+    found = []
+    for eid in path.edges:
+        src, dst = eid.split(":", 2)[2].split(">")
+        for p in g.edges[src, dst, eid].get("provenance", []):
+            found.append({"edge": eid, **p})
+    return found

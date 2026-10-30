@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spotter · Review queue</title>
+  <link rel="stylesheet" href="/static/app.css?v={{ css_version }}">
+  <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
+</head>
+<body hx-target="#review" hx-swap="outerHTML">
+  <header class="bar">
+    <div class="brand">
+      <span class="brand-name">Spotter</span>
+      <span class="brand-sub">Review queue · {{ reviewer }}</span>
+    </div>
+    <div class="call-meta"><a class="navlink" href="/">← Back to the call</a></div>
+  </header>
+  {% include "_review.html" %}
+</body>
+</html>
