@@ -1,10 +1,11 @@
 {% macro path(rows) %}
 {% if rows %}
-<details class="path">
+<details class="path" {{ 'open' if open_paths }}>
   <summary>Show path <span class="muted">({{ rows|length }} edges walked)</span></summary>
   <ol>
     {% for r in rows %}
-    <li title="{{ r.id }}"><span class="node">{{ r.src_label }}</span> <span class="edge {{ 'gated' if r.gated }}">{{ r.type }}</span> <span class="node">{{ r.dst_label }}</span>{% if r.gated %} <span class="gate">approved edge</span>{% endif %}</li>
+    <li title="{{ r.id }}"><span class="node">{{ r.src_label }}</span> <span class="edge {{ 'gated' if r.gated }}">{{ r.type }}</span> <span class="node">{{ r.dst_label }}</span>{% if r.gated %} <span class="gate">compliance edge</span>{% endif %}
+      {% if r.provenance %}{% set pv = r.provenance[0] %}<span class="prov" data-provenance="{{ pv.proposal }}">{{ 'Approved' if pv.action == 'approve' else 'Corroborated (merged)' }} by {{ pv.approver }}, {{ pv.at[:10] }} · {{ pv.doc }}: <q>{{ pv.quote }}</q>{% if r.provenance|length > 1 %} (+{{ r.provenance|length - 1 }} more){% endif %}</span>{% endif %}</li>
     {% endfor %}
   </ol>
 </details>

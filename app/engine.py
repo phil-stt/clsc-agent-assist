@@ -38,7 +38,8 @@ def beats() -> list[dict]:
 
 @lru_cache(maxsize=1)
 def base_graph() -> nx.MultiDiGraph:
-    return kg.load() if kg.GRAPH_JSON.exists() else kg.build()
+    """The curated seed plus the review record. Built, not loaded, so it always matches approvals.json."""
+    return kg.build()
 
 
 def client() -> str:
@@ -411,7 +412,8 @@ def path_view(g: nx.MultiDiGraph, path: q.Path) -> list[dict]:
         data = next(d for _, _, k, d in g.out_edges(src, keys=True, data=True) if k == eid)
         rows.append({"id": eid, "type": etype, "src": src, "dst": dst,
                      "src_label": q.label(g, src), "dst_label": q.label(g, dst),
-                     "gated": data["requires_approval"]})
+                     "gated": data["requires_approval"],
+                     "provenance": [p for p in data.get("provenance", []) if p["via"] != "auto (plain data)"]})
     return rows
 
 

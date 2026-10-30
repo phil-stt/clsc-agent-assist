@@ -8,13 +8,15 @@ advances one beat per tick.
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app import engine, state as st
+from app import engine, review, state as st
+from knowledge import approvals
 
 ROOT = Path(__file__).resolve().parent
 TICK_SECONDS = 6
@@ -37,7 +39,8 @@ def stage(request: Request, s: dict, flash: dict | None = None) -> HTMLResponse:
            "upcoming": engine.beats()[n] if n < len(engine.beats()) else None,
            "cards": engine.panel(s), "events": st.events(s["id"])[::-1],
            "call": engine.call()["call"], "tick": TICK_SECONDS, "flash": flash,
-           "css_version": int((ROOT / "static" / "app.css").stat().st_mtime)}
+           "css_version": int((ROOT / "static" / "app.css").stat().st_mtime),
+           "open_paths": request.query_params.get("paths") == "open"}  # presenter view: every path expanded
     name = "index.html" if request.headers.get("HX-Request") != "true" else "stage.html"
     return templates.TemplateResponse(request, name, ctx)
 
@@ -141,3 +144,33 @@ def accept_draft(request: Request, kind: str, title: str = Form(...), body: str 
     s = engine.accept_draft(st.load(), kind, title, body)
     st.save(s)
     return stage(request, s)
+
+
+# --- The review screen ---------------------------------------------------------
+
+def review_page(request: Request, flash: dict | None = None) -> HTMLResponse:
+    # A click posts to /review/{id}/{action}; the filter lives on the page it came from.
+    page = parse_qs(urlparse(request.headers.get("HX-Current-URL", "")).query)
+    doc = request.query_params.get("doc") or page.get("doc", [""])[0]
+    ctx = {**review.view(doc), "flash": flash,
+           "css_version": int((ROOT / "static" / "app.css").stat().st_mtime)}
+    name = "review.html" if request.headers.get("HX-Request") != "true" else "_review.html"
+    return templates.TemplateResponse(request, name, ctx)
+
+
+@app.get("/review", response_class=HTMLResponse)
+def review_screen(request: Request):
+    return review_page(request)
+
+
+@app.post("/review/{pid}/{action}", response_class=HTMLResponse)
+def review_decide(request: Request, pid: str, action: str):
+    try:
+        rec = review.decide(pid, action)
+    except approvals.ApprovalError as err:
+        return review_page(request, {"tone": "amber", "title": "Not recorded", "text": str(err)})
+    engine.base_graph.cache_clear()
+    verb = {"approve": "Approved", "reject": "Rejected", "merge": "Merged"}[rec["action"]]
+    return review_page(request, {"tone": "green" if rec["action"] != "reject" else "amber",
+                                 "title": verb, "text": f"{rec['type']} {rec['from']} → {rec['to']}. Recorded "
+                                                        f"as #{rec['seq']}; the graph is rebuilt."})

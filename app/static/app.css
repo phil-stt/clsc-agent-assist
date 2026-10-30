@@ -135,3 +135,38 @@ p.draft-title { border: 0; padding: 0; }
   .bar { flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
   .call-meta { margin-left: 0; }
 }
+
+/* Review screen */
+.navlink { color: var(--blue); text-decoration: none; font-weight: 600; }
+.review { max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px; }
+.review h1 { font-size: 20px; margin: 0 0 6px; }
+.review-head { margin-bottom: 18px; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; }
+.stats div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; }
+.stats dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.stats dd { margin: 0; font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.doc { margin-bottom: 18px; }
+.doc h2 { font-family: ui-monospace, Menlo, monospace; text-transform: none; letter-spacing: 0; }
+.prop { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid; border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px; }
+.prop.tone-blue { border-left-color: var(--blue); }
+.prop.tone-green { border-left-color: var(--green); }
+.prop.tone-amber { border-left-color: var(--amber-line); background: var(--amber-bg); }
+.prop-edge { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.prop .quote { margin: 6px 0; color: var(--ink); }
+.prop .checks { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; margin: 0 0 6px; }
+.conflict { color: var(--amber); font-weight: 600; }
+.tag { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 99px; font-weight: 700; }
+.tag.auto { background: #eceef2; color: var(--muted); }
+.tag.person { background: var(--blue-bg); color: var(--blue); }
+.decided-line { margin: 4px 0 0; font-weight: 600; }
+.decided-line.tone-green { color: var(--green); }
+.decided-line.tone-amber { color: var(--amber); }
+.decided-line .muted { font-weight: 400; margin-left: 6px; }
+.review-log ol { max-height: none; }
+.flash.tone-green { background: var(--green-bg); border-color: #9fd5b1; color: #0d4f25; }
+.review .flash { margin: 0 0 14px; }
+.prov { display: block; font-size: 11px; color: var(--muted); margin: 1px 0 4px 18px; }
+.prop { scroll-margin-top: 80px; }
+.filters { margin: 12px 0 0; font-size: 13px; }
+.filters a { margin-right: 10px; color: var(--blue); text-decoration: none; }
+.filters a.on { color: var(--ink); font-weight: 700; }

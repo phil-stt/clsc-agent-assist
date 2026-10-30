@@ -10,6 +10,7 @@ exactly which edges it walked.
 from __future__ import annotations
 
 import json
+import os
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -21,7 +22,7 @@ ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "schema.yaml"
 SEED_DIR = ROOT / "seed"
 DISCLOSURE_DIR = ROOT / "disclosures"
-GRAPH_JSON = ROOT / "graph.json"
+GRAPH_JSON = Path(os.environ.get("CLSC_GRAPH", ROOT / "graph.json"))
 
 
 class SchemaError(ValueError):
@@ -64,7 +65,8 @@ def add_edge(g: nx.MultiDiGraph, edge: dict) -> str:
     return eid
 
 
-def build() -> nx.MultiDiGraph:
+def build(reviewed: bool = True) -> nx.MultiDiGraph:
+    """The curated seed, then (unless reviewed=False) the decisions in approvals.json."""
     g = nx.MultiDiGraph()
     docs = [yaml.safe_load(p.read_text()) for p in sorted(SEED_DIR.glob("*.yaml"))]
     for doc in docs:
@@ -73,6 +75,9 @@ def build() -> nx.MultiDiGraph:
     for doc in docs:
         for edge in doc.get("edges", []):
             add_edge(g, edge)
+    if reviewed:
+        from knowledge import approvals
+        approvals.apply(g)
     return g
 
 
@@ -123,5 +128,6 @@ if __name__ == "__main__":
     graph = build()
     dump(graph)
     gated = sum(1 for *_, d in graph.edges(data=True) if d["requires_approval"])
+    reviewed = sum(1 for *_, d in graph.edges(data=True) if d.get("provenance"))
     print(f"graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges "
-          f"({gated} compliance-bearing) -> {GRAPH_JSON.relative_to(ROOT.parent)}")
+          f"({gated} compliance-bearing, {reviewed} with review provenance) -> {GRAPH_JSON}")

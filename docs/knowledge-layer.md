@@ -31,9 +31,9 @@ Each one is a test in the repo. A passing answer returns the result **and the pa
 | CQ5 | What changed on this account since the underwriting file was written? | Design work now done in-house (file said none). New location in Vernon. | UnderwritingFacts with as_of vs. current Client facts; diff |
 | CQ6 | Does Reyes's GL cover design work she does in-house? | **No.** Professional services exclusion. The product that does is Contractors Professional Liability, market non-admitted. | Coverage → EXCLUDES Exposure; Exposure → ADDRESSED_BY Product → PLACED_IN Market |
 | CQ7 | Can a certificate be issued today showing completed-ops AI for the property manager? | **No.** Human-only action, and CQ1 says the form isn't there. Route to endorsement request. | CQ1 plus the certificate rule (Rule node) |
-| CQ8 | If the client's home state were Texas, which disclosure replaces the D-1? | Texas surplus lines notice per TIC §981 (illustrative wording in the demo, labeled). Same call flow, different Disclosure node. | Market → TRIGGERS Disclosure scoped by State=TX. *Stretch; WO-004.* |
+| CQ8 | If the client's home state were Texas, which disclosure replaces the D-1? | Texas surplus lines notice per TIC §981 (illustrative wording in the demo, labeled). Same call flow, different Disclosure node. | Market → TRIGGERS Disclosure scoped by State=TX. *Stretch; a later phase.* |
 
-CQ1 through CQ7 must pass in WO-001. CQ8 proves the layer earned its keep and waits for WO-004.
+CQ1 through CQ7 must pass in the first phase. CQ8 proves the layer earned its keep and waits for a later phase.
 
 ## How each approach scores
 | | A curated | B GraphRAG | C hybrid |
@@ -43,10 +43,10 @@ CQ1 through CQ7 must pass in WO-001. CQ8 proves the layer earned its keep and wa
 | Who's liable when it's wrong | The modeler | Nobody you can name | The approver, by design |
 | Fit for a regulated call | Good, slow | Fast, not defensible | Good enough, extensible |
 
-The prototype shows C working and shows the approval queue (WO-002) so the tradeoff is visible on screen rather than claimed on a slide.
+The prototype shows C working and shows the approval queue (the review screen) so the tradeoff is visible on screen rather than claimed on a slide.
 
 ## Assumptions, stated
 - The AMS exposes the policy, the attached forms, and the underwriting file as structured data. In the demo it's YAML; in production it's an API or a nightly export.
 - ISO form numbers are stable public identifiers. Carrier proprietary forms would need their own nodes.
-- One home state in WO-001 (California). Multi-state is a scoping of edges by `State`, which the schema already carries.
+- One home state in the first phase (California). Multi-state is a scoping of edges by `State`, which the schema already carries.
 - Statutory wording in the demo is quoted from public sources and labeled with its citation. Legal owns the words; the AI never edits them.

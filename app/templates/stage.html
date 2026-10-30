@@ -1,4 +1,4 @@
-{% import "_cards.html" as c %}
+{% import "_cards.html" as c with context %}
 <div id="stage" class="stage">
   {% if s.playing %}<div hx-post="/tick" hx-trigger="every {{ tick }}s"></div>{% endif %}
 
@@ -13,6 +13,7 @@
       <span class="muted">beat {{ s.beat }} / {{ total }}</span>
     </div>
     <div class="controls">
+      <a class="navlink" href="/review" hx-boost="false" style="align-self:center;margin-right:6px">Review queue</a>
       <button hx-post="/restart" class="ghost">Restart</button>
       {% if s.playing %}
         <button hx-post="/pause">Pause</button>

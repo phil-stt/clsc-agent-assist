@@ -16,7 +16,7 @@ entities:
   State: {}
   Rule: {}
   Disclosure: {description: "Verbatim text owned by compliance, read from knowledge/disclosures/."}
-  Contract: {description: "A third party's contract that sets insurance requirements (added for WO-001: the requirements need an owner)."}
+  Contract: {description: "A third party's contract that sets insurance requirements."}
   ContractRequirement: {}
   Exposure: {description: "A loss exposure a coverage may exclude and a product may address."}
   UnderwritingFact: {description: "A statement from the underwriting file, with an as_of date."}

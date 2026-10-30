@@ -4,6 +4,8 @@
 
 Spotter is an AI co-pilot for a commercial lines account manager on a live service call. One scripted eleven-minute call plays on the left. On the right, the co-pilot pulls the account, reads the endorsements actually attached to the policy, blocks a certificate the policy can't support, catches an unreported location and a professional liability exposure, surfaces the exact surplus lines disclosure when the agent moves to quote, blocks the quote until it's delivered, and drafts the after-call work for the agent to review. A knowledge graph sits behind every grounded answer, and each answer can show the path it walked.
 
+**Presentation:** [deck link]
+
 The problem, the scenario and the human-in-the-loop table are in [`docs/design-brief.md`](docs/design-brief.md). The architecture decision and the competency questions are in [`docs/knowledge-layer.md`](docs/knowledge-layer.md). The build contract is in [`docs/work-order-001.md`](docs/work-order-001.md).
 
 ## Run it
@@ -11,14 +13,15 @@ The problem, the scenario and the human-in-the-loop table are in [`docs/design-b
 Requires Python 3.12 and `make`.
 
 ```bash
-make dev        # one command: creates .venv, installs pinned deps, builds the graph, serves http://localhost:8000
+make dev        # one command: creates .venv, installs pinned deps, builds the review queue and the graph, serves http://localhost:8000
 ```
 
-Press **Play** to let the call run (one beat every six seconds), or **Next beat** to step it. **Restart** clears the call.
+Press **Play** to let the call run (one beat every six seconds), or **Next beat** to step it. **Restart** clears the call. **Review queue** (or http://localhost:8000/review) opens the approval screen for the edges Claude proposed. Add `?paths=open` to the call's URL to expand every "Show path".
 
 ```bash
-make test       # competency questions CQ1–CQ7 plus the UI's compliance checks
+make test       # competency questions CQ1–CQ7, the UI's compliance checks, and the review gate
 make extract    # Claude proposes graph edges from the document corpus -> knowledge/proposed_edges.json
+make graph      # curated seed + knowledge/approvals.json -> knowledge/graph.json
 make scrub      # public-tier check: private references and secrets
 ```
 
@@ -45,6 +48,7 @@ make scrub      # public-tier check: private references and secrets
 | ![Forms match with the gap](docs/screenshots/day1-2-forms-gap.png) | ![Certificate block](docs/screenshots/day1-3-certificate-block.png) |
 | ![D-1 at the quote beat](docs/screenshots/day2-1-d1-beat.png) | ![Amber skip block](docs/screenshots/day2-2-skip-block.png) |
 | ![Wrap drafts](docs/screenshots/day2-3-wrap.png) | ![Account card](docs/screenshots/day1-1-account-card.png) |
+| ![Review screen with the MANDATES merge](docs/screenshots/wo2-1-review-merge.png) | ![Show path with review provenance](docs/screenshots/wo2-2-path-provenance.png) |
 
 ## Human in the loop, as enforced
 
@@ -58,9 +62,11 @@ The design brief's table, and what the UI does about each column. Three visual s
 
 ## How it's built
 
-- **`knowledge/`**: the curated schema (`schema.yaml`), the seed for the demo world (`seed/`), the long-form corpus (`docs/`), and the verbatim disclosures (`disclosures/`). `graph.py` builds a NetworkX graph and writes `graph.json`. `queries.py` answers the competency questions, and each answer returns its path. The tests in `cq/` fail without one. `extract.py` is the extraction half of the hybrid: Claude reads each document and proposes edges against the schema; each proposal is checked against the schema, its evidence quote checked against the document, and compared with the curated graph. Nothing it proposes enters the graph.
+- **`knowledge/`**: the curated schema (`schema.yaml`), the seed for the demo world (`seed/`), the long-form corpus (`docs/`), and the verbatim disclosures (`disclosures/`). `graph.py` builds a NetworkX graph and writes `graph.json`. `queries.py` answers the competency questions, and each answer returns its path. The tests in `cq/` fail without one. `extract.py` is the extraction half of the hybrid: Claude reads each document and proposes edges against the schema; each proposal is checked against the schema, its evidence quote checked against the document, and compared with the curated graph. Nothing it proposes enters the graph until it's decided on the review screen.
 - **`app/`**: FastAPI, Jinja2 and HTMX. `llm.py` is the only code that calls a model (`claude-opus-5-5`, low effort, JSON-schema output). `engine.py` turns call state into cards; forms matching, the certificate rule, the disclosure choice, the exemption check and the quote block are deterministic. State and the append-only event log are in SQLite (`var/state.db`).
 - **`data/call.yaml`**: the scripted call, with the detection each beat is expected to produce as the offline fallback.
+
+**Review screen.** `/review` lists every edge Claude proposed, grouped by source document, with its evidence quote, the schema check, whether the quote was found in the document, and whether it matches a curated edge, is new, or overlaps one. The reviewer approves, rejects, or merges a proposal that restates an existing edge into that edge. Only edge types the schema marks `requires_approval` wait for a person; plain data edges are auto-approved and tagged "auto", and the screen counts how many waited. Each decision is appended to `knowledge/approvals.json` (`knowledge/approvals.py`), which `make graph` applies on top of the curated seed, so a clone with the file reproduces the reviewed graph. The record refuses a compliance-bearing edge that didn't come through the screen, and the graph build refuses it again. An approved edge carries its provenance (proposal, document, quote, approver, time), and the call's "Show path" prints it under the edge. The repository ships with only the auto-approvals in the record, so the review can be done live; `git restore knowledge/approvals.json` resets it.
 
 ## What's simulated
 
@@ -73,13 +79,16 @@ The design brief's table, and what the UI does about each column. Three visual s
 
 ## Roadmap
 
-In order, with the reason for the order:
+Built: Phase 1, the call (this prototype), and the first half of Phase 2, the review screen that keeps extracted edges out of the graph until a person approves them. Next, in order, with the reason for the order:
 
-1. **Approve extracted edges.** A review screen for `proposed_edges.json`: approve, reject or edit each proposal, with its evidence quote and the curated edge it matches. The graph is only as trustworthy as its approval step, and every later phase reads the graph.
-2. **Grade the call from the same graph.** Score the event log against the rules that guided the agent: recorded line delivered, D-1 before quote, no certificate past a gap. Guided text equals graded text, and QA stops being a file audit weeks later.
-3. **A second home state.** Add another state's disclosure rules to the graph and show the disclosure beat change with no change to the call flow. This is the test that the knowledge layer, not the call script, carries the compliance.
-4. **Live audio and a real AMS.** Speech-to-text in place of the script, and read access to an agency management system and carrier forms. Last, because it's integration work that only pays off once the layer above it is trusted.
+- **Phase 2: Grade the call from the same graph.** Score the event log against the rules that guided the agent: recorded line delivered, D-1 before quote, no certificate past a gap. Guided text equals graded text, and QA stops being a file audit weeks later.
+- **Phase 3: A second home state.** Add another state's disclosure rules to the graph, through the review screen, and show the disclosure beat change with no change to the call flow. This is the test that the knowledge layer, not the call script, carries the compliance.
+- **Phase 4: Live audio and a real AMS.** Speech-to-text in place of the script, and read access to an agency management system and carrier forms. Last, because it's integration work that only pays off once the layer above it is trusted.
+
+## How it was built
+
+The prototype was built as a split between a product-manager role and an engineering role, each an AI agent working with a human who approved every step. The product manager wrote the build contracts and the engineer built to them; [`docs/work-order-001.md`](docs/work-order-001.md) and [`docs/work-order-002.md`](docs/work-order-002.md) are those contracts, kept as the record.
 
 ## Status
 
-Prototype. The full eleven-beat call works end to end, with 25 tests green.
+Prototype. The full eleven-beat call and the review screen work end to end, with 31 tests green.

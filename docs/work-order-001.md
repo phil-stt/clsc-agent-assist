@@ -47,7 +47,7 @@ Beats, and what the panel must do at each:
 Use the table in `docs/design-brief.md` ("Where AI decides, recommends, or hands off") literally. Three visual states: **blue** is the AI proposing, **green** is a human decision, **amber** is a block or a nudge. Human-only actions (issue certificate, bind, quote, deliver disclosure, agree a fee, select the market) are either disabled with a reason or require an explicit agent click that gets logged. Keep a visible event log so the "guided text equals graded text" stretch has somewhere to read from later.
 
 ## Out of scope for WO-001
-Audio or speech-to-text. Real AMS or carrier integrations. The extraction approval UI (WO-002). Second state (WO-004). Call scoring (WO-004). The deck and write-ups (WO-003, mine). Don't build any of it; mention it in the README roadmap.
+Audio or speech-to-text. Real AMS or carrier integrations. The extraction approval UI (WO-002). Second state (WO-004). Call scoring (WO-004). The presentation. Don't build any of it; mention it in the README roadmap.
 
 ## Acceptance criteria
 1. `pytest` green, CQ1 through CQ7 passing with a path on each.

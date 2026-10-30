@@ -10,7 +10,7 @@ setup: .venv/.installed
 	.venv/bin/pip install -q -r requirements.txt
 	touch $@
 
-dev: setup graph
+dev: setup extract graph
 	$(PY) -m uvicorn app.main:app --reload --port 8000
 
 test: setup

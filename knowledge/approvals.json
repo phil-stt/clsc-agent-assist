@@ -1,0 +1,62 @@
+[
+  {
+    "seq": 1,
+    "at": "2026-10-30T17:04:18+00:00",
+    "proposal": "p-599d561e",
+    "action": "approve",
+    "type": "OFFERED_BY",
+    "from": "product:cpl",
+    "to": "carrier:harborline-specialty",
+    "condition": "illustrative",
+    "doc": "docs/products/contractors-professional-liability.md",
+    "evidence": "Illustrative carriers: Harborline Specialty Insurance Co., Meridian Surplus Underwriters",
+    "reviewer": "auto",
+    "via": "auto (plain data)",
+    "merged_into": null
+  },
+  {
+    "seq": 2,
+    "at": "2026-10-30T17:04:18+00:00",
+    "proposal": "p-5134a0d4",
+    "action": "approve",
+    "type": "OFFERED_BY",
+    "from": "product:cpl",
+    "to": "carrier:meridian-surplus",
+    "condition": "illustrative",
+    "doc": "docs/products/contractors-professional-liability.md",
+    "evidence": "Illustrative carriers: Harborline Specialty Insurance Co., Meridian Surplus Underwriters",
+    "reviewer": "auto",
+    "via": "auto (plain data)",
+    "merged_into": null
+  },
+  {
+    "seq": 3,
+    "at": "2026-10-30T17:04:18+00:00",
+    "proposal": "p-239f61ab",
+    "action": "approve",
+    "type": "OFFERED_BY",
+    "from": "product:cyber",
+    "to": "carrier:westbrook-mutual",
+    "condition": "admitted placement in California",
+    "doc": "docs/products/cyber.md",
+    "evidence": "admitted (Westbrook Mutual)",
+    "reviewer": "auto",
+    "via": "auto (plain data)",
+    "merged_into": null
+  },
+  {
+    "seq": 4,
+    "at": "2026-10-30T17:04:18+00:00",
+    "proposal": "p-5cca4544",
+    "action": "approve",
+    "type": "OFFERED_BY",
+    "from": "product:cyber",
+    "to": "carrier:harborline-specialty",
+    "condition": "non-admitted placement in California",
+    "doc": "docs/products/cyber.md",
+    "evidence": "non-admitted (Harborline Specialty)",
+    "reviewer": "auto",
+    "via": "auto (plain data)",
+    "merged_into": null
+  }
+]
