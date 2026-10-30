@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -36,7 +36,8 @@ def stage(request: Request, s: dict, flash: dict | None = None) -> HTMLResponse:
     ctx = {"s": s, "beats": engine.beats()[:n], "total": len(engine.beats()),
            "upcoming": engine.beats()[n] if n < len(engine.beats()) else None,
            "cards": engine.panel(s), "events": st.events(s["id"])[::-1],
-           "call": engine.call()["call"], "tick": TICK_SECONDS, "flash": flash}
+           "call": engine.call()["call"], "tick": TICK_SECONDS, "flash": flash,
+           "css_version": int((ROOT / "static" / "app.css").stat().st_mtime)}
     name = "index.html" if request.headers.get("HX-Request") != "true" else "stage.html"
     return templates.TemplateResponse(request, name, ctx)
 
@@ -116,5 +117,27 @@ def issue_certificate(request: Request):
 @app.post("/endorsement/start", response_class=HTMLResponse)
 def start_endorsement(request: Request):
     s = engine.start_endorsement(st.load())
+    st.save(s)
+    return stage(request, s)
+
+
+@app.post("/product/{status}", response_class=HTMLResponse)
+def decide_product(request: Request, status: str):
+    s = engine.decide_product(st.load(), status)
+    st.save(s)
+    return stage(request, s)
+
+
+@app.post("/quote/request", response_class=HTMLResponse)
+def request_quote(request: Request):
+    s, result = engine.request_quote(st.load())
+    st.save(s)
+    flash = None if result["requested"] else {"tone": "amber", "title": "Quote request blocked", "text": result["reason"]}
+    return stage(request, s, flash)
+
+
+@app.post("/wrap/{kind}/accept", response_class=HTMLResponse)
+def accept_draft(request: Request, kind: str, title: str = Form(...), body: str = Form(...)):
+    s = engine.accept_draft(st.load(), kind, title, body)
     st.save(s)
     return stage(request, s)

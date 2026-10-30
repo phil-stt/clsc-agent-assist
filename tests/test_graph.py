@@ -14,3 +14,10 @@ def test_compliance_edges_are_flagged_for_approval():
     gated = {d["type"] for *_, d in g.edges(data=True) if d["requires_approval"]}
     assert {"SATISFIES", "PLACED_IN", "TRIGGERS", "EXEMPT_WHEN", "EXCLUDES"} <= gated
     assert not {"HAS", "ATTACHES", "COVERS"} & gated
+
+
+def test_seed_has_no_empty_attributes():
+    """A bare comma inside a YAML flow mapping splits a value into stray null keys."""
+    g = kg.build()
+    assert not [(n, k) for n, d in g.nodes(data=True) for k, v in d.items() if v is None]
+    assert not [(d["id"], k) for *_, d in g.edges(data=True) for k, v in d.items() if v is None]

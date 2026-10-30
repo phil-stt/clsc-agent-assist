@@ -67,7 +67,7 @@ nodes:
   - {id: form:CG2279, type: Form, number: CG 22 79, name: "Exclusion – Contractors – Professional Liability", doc: forms/cg-22-79.md}
 
   # Exposures
-  - {id: exposure:professional-services, type: Exposure, name: Professional services (design, specifications, drawings)}
+  - {id: exposure:professional-services, type: Exposure, name: "Professional services (design, specifications, drawings)"}
   - {id: exposure:cyber, type: Exposure, name: Network security and privacy}
   - {id: exposure:non-owned-auto, type: Exposure, name: Hired and non-owned autos}
 

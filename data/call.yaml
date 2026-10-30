@@ -11,6 +11,10 @@ call:
   client: client:reyes-design-build
   contract: contract:larchmont-msa
   caller: Marisol Reyes, owner, Reyes Design Build (fictional)
+  date: "2026-10-29"
+  # The co-pilot's proposed follow-up: she reviews over the weekend, the agent checks back after.
+  follow_up: "2026-11-03"
+  follow_up_label: "Tuesday, November 3, 2026"
 
 beats:
   - n: 1

@@ -1,6 +1,6 @@
 # The knowledge layer: why C, and what it has to answer
 
-*2026-10-29. The architecture question the use case exists to explore. Decision first, tests second, write-up argument third.*
+*2026-10-29. The architecture question the project exists to explore. Decision first, tests second, write-up argument third.*
 
 ## Decision
 **Approach C, the hybrid.** A small curated schema holds the entity types and the edges that carry compliance meaning. LLM extraction reads the synthetic form, product and statute documents and *proposes* edges into a review queue. A person approves anything that changes a disclosure rule or a coverage relationship. Plain RAG over the long text (the endorsement form, the statute) supplies the citation when the UI needs to show words.

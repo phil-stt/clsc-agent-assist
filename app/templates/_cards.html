@@ -19,24 +19,43 @@
 </div>
 {% endmacro %}
 
+{% macro src(card) %}
+<p class="src">Read by {{ {'claude-cached': 'Claude (cached response)', 'claude-live': 'Claude', 'scripted': 'scripted fallback (no model call)'}[card.source] }} · <q>{{ card.evidence }}</q></p>
+{% endmacro %}
+
 {% macro render(card) %}
 <article class="card tone-{{ card.tone }}" id="card-{{ card.id }}">
 {% if card.kind == 'nudge' %}
   {{ head(card, 'Nudge') }}
   <p>{{ card.body }}</p>
   <p class="cite">{{ card.citation }}</p>
-  <button hx-post="/mark/{{ card.mark }}" class="decide">Mark delivered</button>
+  <button hx-post="/mark/{{ card.mark }}" class="decide">{{ card.button }}</button>
+
+{% elif card.kind == 'skip' %}
+  {{ head(card, 'Block · disclosure before quote') }}
+  <p><strong>{{ card.body }}</strong></p>
+  <p><button hx-post="/mark/{{ card.mark }}" class="decide">{{ card.button }}</button></p>
+  <div class="verbatim" data-disclosure="{{ card.disclosure.id }}">{{ card.disclosure.text }}</div>
+  <p class="cite">{{ card.disclosure.citation }} · {{ card.disclosure.deliver }}</p>
 
 {% elif card.kind == 'disclosure' %}
   {{ head(card, 'Disclosure · verbatim') }}
   <p class="lede">{{ card.lede }}</p>
-  <div class="verbatim" data-disclosure="{{ card.disclosure.id }}">{{ card.disclosure.text }}</div>
-  <p class="cite">{{ card.disclosure.citation }} · owner: {{ card.disclosure.owner }}</p>
-  {% if card.delivered %}
-    <p class="decided">✓ Delivered. Marked by the agent.</p>
-  {% else %}
-    <button hx-post="/mark/{{ card.mark }}" class="decide">Mark delivered</button>
+  {% if card.exemption %}
+  <div class="check {{ 'pass' if card.exemption.applies else 'fail' }}">
+    <span class="kicker">Industrial-insured exemption · graph check</span>
+    <p>{{ card.exemption.reason[:1]|upper }}{{ card.exemption.reason[1:] }}. {{ 'Signature waived; the notice still goes on the placement.' if card.exemption.applies else 'Signature required.' }}</p>
+    <p class="cite">{{ card.exemption.citation }}</p>
+  </div>
   {% endif %}
+  <div class="verbatim" data-disclosure="{{ card.disclosure.id }}">{{ card.disclosure.text }}</div>
+  <p class="cite">{{ card.disclosure.citation }} · owner: {{ card.disclosure.owner }}{% if card.trigger %} · triggered by the non-admitted market ({{ card.trigger }}){% endif %}</p>
+  {% if card.delivered %}
+    <p class="decided">✓ {{ card.done }}</p>
+  {% else %}
+    <button hx-post="/mark/{{ card.mark }}" class="decide">{{ card.button }}</button>
+  {% endif %}
+  {{ path(card.path) }}
 
 {% elif card.kind == 'account' %}
   {{ head(card, 'AMS record') }}
@@ -67,7 +86,7 @@
 
 {% elif card.kind == 'call_type' %}
   {{ head(card, 'Detected') }}
-  <p class="src">Read by {{ {'claude-cached': 'Claude (cached response)', 'claude-live': 'Claude', 'scripted': 'scripted fallback (no model call)'}[card.source] }} · <q>{{ card.evidence }}</q></p>
+  {{ src(card) }}
   <p>Contract requirements parsed into a checklist:</p>
   <ul class="checklist">
     {% for r in card.requirements %}<li>{{ r.name }}</li>{% endfor %}
@@ -82,7 +101,7 @@
     {% for r in card.rows %}
       <tr class="st-{{ r.status }}">
         <td>{{ r.name }}</td>
-        <td>{% if r.status == 'satisfied' %}<span class="ok">Yes</span>{% elif r.status == 'if_scheduled' %}<span class="cond">Yes, if scheduled</span>{% else %}<span class="gap">Not on the policy</span>{% endif %}</td>
+        <td>{% if r.status == 'satisfied' %}<span class="ok">Yes</span>{% elif r.status == 'if_scheduled' %}<span class="cond">{{ 'Scheduling requested' if card.requested else 'Yes, if scheduled' }}</span>{% else %}<span class="gap">Not on the policy</span>{% if card.requested %}<br><span class="muted">endorsement requested</span>{% endif %}{% endif %}</td>
         <td>{% if r.form_label %}{{ r.form_label }}{% if r.status == 'if_scheduled' %}<br><span class="muted">{{ r.condition }}</span>{% endif %}{% else %}<span class="muted">needs</span> {{ r.remedy_labels|join(', ') }}{% endif %}</td>
       </tr>
     {% endfor %}
@@ -96,11 +115,13 @@
   <div class="actions">
     <button hx-post="/certificate/issue" class="locked" aria-disabled="true" title="{{ a.reason }}">🔒 Issue certificate</button>
     {% if card.endorsement %}
-      <p class="decided">✓ Endorsement request started by the agent: {{ card.endorsement.forms|join(', ') }} to {{ card.endorsement.carrier }}.</p>
+      <p class="decided">✓ Endorsement request started by the agent to {{ card.endorsement.carrier }}.</p>
     {% else %}
       <button hx-post="/endorsement/start" class="decide">Start endorsement request ({{ card.forms|join(', ') }})</button>
     {% endif %}
   </div>
+  <p class="lede">Everything the contract needs:</p>
+  <ul class="items">{% for i in (card.endorsement['items'] if card.endorsement else card['items']) %}<li>{{ i }}</li>{% endfor %}</ul>
   <p class="reason"><strong>Why:</strong> {{ a.reason }}</p>
   <p class="cite">{{ a.citation }} · issuing a certificate is a licensed agent's act</p>
   <div class="words">
@@ -108,6 +129,82 @@
     <p>{{ card.words }}</p>
   </div>
   {{ path(card.path) }}
+
+{% elif card.kind == 'location' %}
+  {{ head(card, 'Detected · graph check') }}
+  {{ src(card) }}
+  {% for l in card.locations %}
+  <p class="lede"><strong>{{ l.name }}</strong>{% if l.since %}, leased {{ l.since }}{% endif %}. The client operates here; the GL doesn't list it.</p>
+  {% endfor %}
+  <p>Queued for the endorsement request to {{ card.carrier }}: add the location.</p>
+  {{ path(card.path) }}
+
+{% elif card.kind == 'drift' %}
+  {{ head(card, 'Account drift · graph') }}
+  <table>
+    <thead><tr><th>Underwriting file</th><th>Now</th></tr></thead>
+    <tbody>
+    {% for ch in card.changes %}
+      <tr><td>{{ ch.was }}<br><span class="muted">{{ ch.was_as_of }}</span></td><td><strong>{{ ch.now }}</strong>{% if ch.now_as_of %}<br><span class="muted">{{ ch.now_as_of }}</span>{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">Goes to underwriting with the endorsement request.</p>
+  {{ path(card.path) }}
+
+{% elif card.kind == 'exposure' %}
+  {{ head(card, 'Detected · AI recommends, agent decides') }}
+  {{ src(card) }}
+  <p class="lede"><strong>The GL won't respond.</strong> {{ card.a.excluded_by }} excludes it.</p>
+  <dl class="facts">
+    <div><dt>Recommended</dt><dd>{{ card.rec.name }}</dd></div>
+    <div><dt>Market</dt><dd>{{ card.rec.market_kind|capitalize }}</dd></div>
+    <div><dt>Carriers</dt><dd>{{ card.rec.carriers|join(', ') }}</dd></div>
+  </dl>
+  {% if card.question %}
+  <div class="words"><span class="kicker">Next best question · AI recommends</span><p>{{ card.question }}</p></div>
+  {% endif %}
+  {% if card.decision %}
+    <p class="decided">✓ {{ 'Confirmed' if card.decision.status == 'confirmed' else 'Dismissed' }} by the agent: {{ card.decision.name }}, {{ card.decision.market }} market.</p>
+  {% else %}
+  <div class="actions" style="margin-top:12px">
+    <button hx-post="/product/confirmed" class="decide">Confirm: {{ card.rec.name }}, {{ card.rec.market_kind }}</button>
+    <button hx-post="/product/dismissed">Dismiss</button>
+  </div>
+  {% endif %}
+  <p class="cite">Choosing the market is the agent's decision; the graph only knows where this product is placed for this state and industry.</p>
+  {{ path(card.path) }}
+
+{% elif card.kind == 'quote' %}
+  {{ head(card, 'Human only · quoting') }}
+  <p>Submission to {{ card.rec.carriers|join(', ') }} ({{ card.rec.market_kind }}). Requires: {% for d in card.disclosures %}{{ d.name }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+  {% if card.quote %}
+    <p class="decided">✓ Quote requested by the agent from {{ card.quote.carriers|join(', ') }}. Nothing is bound.</p>
+  {% else %}
+    <button hx-post="/quote/request" class="decide">Request quote</button>
+  {% endif %}
+
+{% elif card.kind == 'decline' %}
+  {{ head(card, 'Call summary · AI') }}
+  <table><tbody>
+    {% for k, v in card.rows %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% endfor %}
+    <tr><th>Follow-up</th><td><strong>{{ card.follow_up }}</strong> <span class="muted">(proposed)</span></td></tr>
+  </tbody></table>
+
+{% elif card.kind == 'draft' %}
+  {% set d = card.d %}
+  {{ head(card, 'Wrap draft · ' ~ {'claude-cached': 'Claude (cached response)', 'claude-live': 'Claude', 'template': 'template fallback (no model call)'}[d.source]) }}
+  {% if d.accepted %}
+    <p class="draft-title">{{ d.title }}</p>
+    <div class="draft-body">{{ d.body }}</div>
+    <p class="decided">✓ Accepted by the agent{{ ' with edits' if d.accepted.edited }}. Not sent: the demo stops at accepted drafts.</p>
+  {% else %}
+  <form hx-post="/wrap/{{ card.wrap_kind }}/accept">
+    <input class="draft-title" name="title" value="{{ d.title }}" aria-label="Title">
+    <textarea class="draft-body" name="body" rows="{{ [d.body.count('\n') + 3, 18]|min }}" aria-label="Draft">{{ d.body }}</textarea>
+    <button type="submit" class="decide">Accept draft</button> <span class="muted">Review and edit before accepting.</span>
+  </form>
+  {% endif %}
 {% endif %}
 </article>
 {% endmacro %}

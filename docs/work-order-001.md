@@ -5,9 +5,9 @@
 ## What we're building
 An AI co-pilot for a commercial lines account manager on a live service call. The demo is one scripted eleven-minute call (Marisol Reyes, Reyes Design Build, calling Pacific Crest Insurance Services about a certificate) with the co-pilot panel beside the transcript. It has to change the outcome of the call on screen, with a graph behind every grounded answer.
 
-Read `docs/use-case.md` first. The scenario, the sample data, the three compliance beats, the certificate rule, and the human-in-the-loop table are all there and they're the spec. Then `docs/knowledge-layer.md` for the schema and the competency questions.
+Read `docs/design-brief.md` first. The scenario, the sample data, the three compliance beats, the certificate rule, and the human-in-the-loop table are all there and they're the spec. Then `docs/knowledge-layer.md` for the schema and the competency questions.
 
-Serves: the working prototype in `docs/use-case.md` ("What to deliver", item 3, parts a through d) and the knowledge architecture evaluation row.
+Serves: the working prototype in `docs/design-brief.md` ("What this project covers", item 3, parts a through d) and its knowledge layer section.
 
 ## Repo and hygiene
 - Path: this repository. Phil creates the GitHub remote, private. He flips it public later; build to the public tier from commit one.
@@ -35,16 +35,16 @@ Beats, and what the panel must do at each:
 2. **Identify.** Account card loads: Reyes Design Build, NAICS 236220, 18 employees, $4.2M, home state CA, policies in force with carriers and limits.
 3. **"I need a COI by Monday, they want AI ongoing and completed ops, primary and noncontributory, waiver of subrogation."** Call type detected: certificate request. The three contract requirements parsed into a checklist.
 4. **Forms read.** Panel shows the forms actually attached to the GL (CG 20 33, CG 24 04) and matches them to the checklist. Ongoing ops: satisfied. Waiver: satisfied if scheduled. **Completed ops: not on the policy. Primary and noncontributory: not on the policy.** This is CQ1 and CQ2 on screen, with "show path" expanding the graph walk.
-5. **The certificate block.** The "Issue certificate" action is disabled with the reason, and "Start endorsement request (CG 20 37, CG 20 01)" is offered instead. Suggested words for the agent to say honestly to Marisol. This is part (b) of the prototype in `docs/use-case.md`: gap caught in-flow before a certificate goes out.
+5. **The certificate block.** The "Issue certificate" action is disabled with the reason, and "Start endorsement request (CG 20 37, CG 20 01)" is offered instead. Suggested words for the agent to say honestly to Marisol. This is part (b) of the prototype in `docs/design-brief.md`: gap caught in-flow before a certificate goes out.
 6. **"Oh, and we leased a yard in Vernon last month."** Location detected, not on the policy (CQ4). Endorsement queued: add location. Underwriting diff starts accumulating (CQ5).
 7. **"We've started doing some of the design in-house now."** Exposure detected: professional services, excluded by the GL (CQ6). Product recommended: Contractors Professional Liability. Market: non-admitted. Agent confirms or dismisses (AI recommends, human confirms).
 8. **Agent moves to quote.** Disclosures surface at this beat, verbatim with citations: D-1 (CIC §1764.1) and the broker fee disclosure. Industrial-insured check shown explicitly: 18 employees, threshold 25, exemption does not apply (CQ3). Agent marks each "delivered" or "sent for signature."
-9. **The skip.** If the agent clicks "Request quote" before marking the D-1 delivered: amber block, "D-1 not yet delivered," with the text right there. This is part (c) of the prototype in `docs/use-case.md`. Make it unmissable in the demo.
+9. **The skip.** If the agent clicks "Request quote" before marking the D-1 delivered: amber block, "D-1 not yet delivered," with the text right there. This is part (c) of the prototype in `docs/design-brief.md`. Make it unmissable in the demo.
 10. **Decline path.** Marisol says "let me think about it." Panel notes: exposure raised, product recommended, disclosure status, follow-up date.
 11. **Wrap.** Three drafts, each in a review state (blue) until the agent accepts (green): activity note for the AMS, endorsement request to Westbrook Mutual (CG 20 37, CG 20 01, add Vernon location), follow-up email to Marisol. Nothing is "sent"; the demo stops at accepted drafts. Part (d).
 
 ## Human-in-the-loop, enforced in the UI
-Use the table in `docs/use-case.md` ("Where AI decides, recommends, or hands off") literally. Three visual states: **blue** is the AI proposing, **green** is a human decision, **amber** is a block or a nudge. Human-only actions (issue certificate, bind, quote, deliver disclosure, agree a fee, select the market) are either disabled with a reason or require an explicit agent click that gets logged. Keep a visible event log so the "guided text equals graded text" stretch has somewhere to read from later.
+Use the table in `docs/design-brief.md` ("Where AI decides, recommends, or hands off") literally. Three visual states: **blue** is the AI proposing, **green** is a human decision, **amber** is a block or a nudge. Human-only actions (issue certificate, bind, quote, deliver disclosure, agree a fee, select the market) are either disabled with a reason or require an explicit agent click that gets logged. Keep a visible event log so the "guided text equals graded text" stretch has somewhere to read from later.
 
 ## Out of scope for WO-001
 Audio or speech-to-text. Real AMS or carrier integrations. The extraction approval UI (WO-002). Second state (WO-004). Call scoring (WO-004). The deck and write-ups (WO-003, mine). Don't build any of it; mention it in the README roadmap.

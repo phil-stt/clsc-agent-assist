@@ -58,7 +58,7 @@ def connect():
 
 
 def empty() -> dict:
-    return {"marks": {}, "decisions": {}, "detections": {}}
+    return {"marks": {}, "decisions": {}, "detections": {}, "drafts": {}}
 
 
 def load(session: str = SESSION) -> dict:
@@ -67,11 +67,11 @@ def load(session: str = SESSION) -> dict:
         if row is None:
             conn.execute("INSERT INTO session (id, data) VALUES (?, ?)", (session, json.dumps(empty())))
             return {"id": session, "beat": 0, "playing": False, **empty()}
-        return {"id": session, "beat": row["beat"], "playing": bool(row["playing"]), **json.loads(row["data"])}
+        return {"id": session, "beat": row["beat"], "playing": bool(row["playing"]), **empty(), **json.loads(row["data"])}
 
 
 def save(state: dict) -> None:
-    data = {k: state[k] for k in ("marks", "decisions", "detections")}
+    data = {k: state[k] for k in ("marks", "decisions", "detections", "drafts")}
     with connect() as conn:
         conn.execute("UPDATE session SET beat = ?, playing = ?, data = ? WHERE id = ?",
                      (state["beat"], int(state["playing"]), json.dumps(data), state["id"]))
