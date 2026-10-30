@@ -1,0 +1,70 @@
+{% import "_cards.html" as c %}
+<div id="stage" class="stage">
+  {% if s.playing %}<div hx-post="/tick" hx-trigger="every {{ tick }}s"></div>{% endif %}
+
+  <header class="bar">
+    <div class="brand">
+      <span class="brand-name">Pacific Crest Insurance Services</span>
+      <span class="brand-sub">Agent Assist · {{ call.agent.split(',')[0] }}</span>
+    </div>
+    <div class="call-meta">
+      <span class="live {{ 'on' if s.playing else '' }}">{{ 'Playing' if s.playing else ('Call ended' if s.beat >= total else 'Paused') }}</span>
+      <span class="clock">{{ beats[-1].t if beats else '00:00' }}</span>
+      <span class="muted">beat {{ s.beat }} / {{ total }}</span>
+    </div>
+    <div class="controls">
+      <button hx-post="/restart" class="ghost">Restart</button>
+      {% if s.playing %}
+        <button hx-post="/pause">Pause</button>
+      {% else %}
+        <button hx-post="/play" {% if s.beat >= total %}disabled{% endif %}>Play</button>
+      {% endif %}
+      <button hx-post="/next" class="primary" {% if s.beat >= total %}disabled{% endif %}>Next beat →</button>
+    </div>
+  </header>
+
+  <div class="simulated">Simulated call. Scripted transcript stands in for live speech-to-text. All people, companies and policies are fictional.</div>
+
+  {% if flash %}
+  <div class="flash tone-{{ flash.tone }}" role="alert"><strong>{{ flash.title }}.</strong> {{ flash.text }}</div>
+  {% endif %}
+
+  <main class="cols">
+    <section class="transcript" aria-label="Call transcript">
+      <h2>Call · {{ call.caller.split(',')[0] }}</h2>
+      {% if not beats %}
+        <p class="empty">Press <strong>Play</strong> or <strong>Next beat</strong> to start the call.</p>
+      {% endif %}
+      <ol class="lines">
+        {% for b in beats %}
+        <li class="line {{ b.speaker }} {{ 'latest' if loop.last else '' }}">
+          <span class="t">{{ b.t }}</span>
+          <span class="who">{{ 'Dana (agent)' if b.speaker == 'agent' else 'Marisol (client)' }}</span>
+          <p>{{ b.text }}</p>
+        </li>
+        {% endfor %}
+      </ol>
+      <details class="log" open>
+        <summary>Event log <span class="muted">({{ events|length }})</span></summary>
+        <ol>
+          {% for e in events if e.kind != 'transcript' %}
+          <li class="ev tone-{{ e.tone }}"><span class="ev-beat">b{{ e.beat }}</span><span class="ev-actor">{{ e.actor }}</span>{{ e.text }}</li>
+          {% endfor %}
+        </ol>
+      </details>
+    </section>
+
+    <section class="panel" aria-label="Co-pilot">
+      <div class="panel-head">
+        <h2>Co-pilot</h2>
+        <div class="legend">
+          <span class="chip tone-blue">AI proposes</span>
+          <span class="chip tone-green">Human decided</span>
+          <span class="chip tone-amber">Block / nudge</span>
+        </div>
+      </div>
+      {% if not cards %}<p class="empty">Listening. Cards appear as the call moves.</p>{% endif %}
+      {% for card in cards %}{{ c.render(card) }}{% endfor %}
+    </section>
+  </main>
+</div>

@@ -1,0 +1,113 @@
+{% macro path(rows) %}
+{% if rows %}
+<details class="path">
+  <summary>Show path <span class="muted">({{ rows|length }} edges walked)</span></summary>
+  <ol>
+    {% for r in rows %}
+    <li title="{{ r.id }}"><span class="node">{{ r.src_label }}</span> <span class="edge {{ 'gated' if r.gated }}">{{ r.type }}</span> <span class="node">{{ r.dst_label }}</span>{% if r.gated %} <span class="gate">approved edge</span>{% endif %}</li>
+    {% endfor %}
+  </ol>
+</details>
+{% endif %}
+{% endmacro %}
+
+{% macro head(card, kicker) %}
+<div class="card-head">
+  <span class="kicker">{{ kicker }}</span>
+  <h3>{{ card.title }}</h3>
+  <span class="chip tone-{{ card.tone }}">{{ {'blue': 'AI proposes', 'green': 'Human decided', 'amber': 'Block'}[card.tone] }}</span>
+</div>
+{% endmacro %}
+
+{% macro render(card) %}
+<article class="card tone-{{ card.tone }}" id="card-{{ card.id }}">
+{% if card.kind == 'nudge' %}
+  {{ head(card, 'Nudge') }}
+  <p>{{ card.body }}</p>
+  <p class="cite">{{ card.citation }}</p>
+  <button hx-post="/mark/{{ card.mark }}" class="decide">Mark delivered</button>
+
+{% elif card.kind == 'disclosure' %}
+  {{ head(card, 'Disclosure · verbatim') }}
+  <p class="lede">{{ card.lede }}</p>
+  <div class="verbatim" data-disclosure="{{ card.disclosure.id }}">{{ card.disclosure.text }}</div>
+  <p class="cite">{{ card.disclosure.citation }} · owner: {{ card.disclosure.owner }}</p>
+  {% if card.delivered %}
+    <p class="decided">✓ Delivered. Marked by the agent.</p>
+  {% else %}
+    <button hx-post="/mark/{{ card.mark }}" class="decide">Mark delivered</button>
+  {% endif %}
+
+{% elif card.kind == 'account' %}
+  {{ head(card, 'AMS record') }}
+  {% set a = card.a %}
+  <div class="acct">
+    <div><span class="acct-name">{{ a.name }}</span><span class="muted">{{ a.contact }}</span></div>
+    <dl class="facts">
+      <div><dt>NAICS</dt><dd>{{ a.naics }} · {{ a.industry }}</dd></div>
+      <div><dt>Employees</dt><dd>{{ a.employees }}</dd></div>
+      <div><dt>Revenue</dt><dd>{{ a.revenue|money }}</dd></div>
+      <div><dt>Home state</dt><dd>{{ a.home_state }}</dd></div>
+      <div><dt>Locations on file</dt><dd>{{ a.locations|join(', ') }}</dd></div>
+    </dl>
+  </div>
+  <table class="pols">
+    <thead><tr><th>Policy</th><th>Carrier</th><th>Limits</th></tr></thead>
+    <tbody>
+    {% for p in a.policies %}
+      <tr>
+        <td><strong>{{ p.line }}</strong><br><span class="muted">{{ p.number }} · {{ p.effective }} to {{ p.expires }}</span></td>
+        <td>{{ p.carrier }}<br><span class="muted">{{ p.market }}</span></td>
+        <td>{% for k, v in p.limits.items() %}{{ k.replace('_', ' ') }} {{ v|money }}{% if not loop.last %}<br>{% endif %}{% endfor %}{% if p.vehicles %}<br>{{ p.vehicles }} vehicles{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {{ path(card.path) }}
+
+{% elif card.kind == 'call_type' %}
+  {{ head(card, 'Detected') }}
+  <p class="src">Read by {{ {'claude-cached': 'Claude (cached response)', 'claude-live': 'Claude', 'scripted': 'scripted fallback (no model call)'}[card.source] }} · <q>{{ card.evidence }}</q></p>
+  <p>Contract requirements parsed into a checklist:</p>
+  <ul class="checklist">
+    {% for r in card.requirements %}<li>{{ r.name }}</li>{% endfor %}
+  </ul>
+
+{% elif card.kind == 'forms' %}
+  {{ head(card, 'Graph · deterministic') }}
+  <p class="muted">{{ card.policy.line }} {{ card.policy.number }}. Attached: {% for f in card.attached %}<strong>{{ f.number }}</strong>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+  <table class="match">
+    <thead><tr><th>Requirement</th><th>On the policy?</th><th>Form</th></tr></thead>
+    <tbody>
+    {% for r in card.rows %}
+      <tr class="st-{{ r.status }}">
+        <td>{{ r.name }}</td>
+        <td>{% if r.status == 'satisfied' %}<span class="ok">Yes</span>{% elif r.status == 'if_scheduled' %}<span class="cond">Yes, if scheduled</span>{% else %}<span class="gap">Not on the policy</span>{% endif %}</td>
+        <td>{% if r.form_label %}{{ r.form_label }}{% if r.status == 'if_scheduled' %}<br><span class="muted">{{ r.condition }}</span>{% endif %}{% else %}<span class="muted">needs</span> {{ r.remedy_labels|join(', ') }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {{ path(card.path) }}
+
+{% elif card.kind == 'certificate' %}
+  {{ head(card, 'Certificate rule') }}
+  {% set a = card.a %}
+  <div class="actions">
+    <button hx-post="/certificate/issue" class="locked" aria-disabled="true" title="{{ a.reason }}">🔒 Issue certificate</button>
+    {% if card.endorsement %}
+      <p class="decided">✓ Endorsement request started by the agent: {{ card.endorsement.forms|join(', ') }} to {{ card.endorsement.carrier }}.</p>
+    {% else %}
+      <button hx-post="/endorsement/start" class="decide">Start endorsement request ({{ card.forms|join(', ') }})</button>
+    {% endif %}
+  </div>
+  <p class="reason"><strong>Why:</strong> {{ a.reason }}</p>
+  <p class="cite">{{ a.citation }} · issuing a certificate is a licensed agent's act</p>
+  <div class="words">
+    <span class="kicker">Suggested words · AI recommends, you decide what to say</span>
+    <p>{{ card.words }}</p>
+  </div>
+  {{ path(card.path) }}
+{% endif %}
+</article>
+{% endmacro %}

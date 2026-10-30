@@ -1,0 +1,84 @@
+# SYNTHETIC DATA. Reyes Design Build, its people, policies, policy numbers,
+# limits and the property manager's contract are all made up.
+# This file stands in for the agency management system record.
+
+nodes:
+  - id: client:reyes-design-build
+    type: Client
+    name: Reyes Design Build, Inc.
+    contact: Marisol Reyes, owner
+    naics: "236220"
+    employees: 18
+    revenue: 4200000
+    home_state: CA
+    synthetic: true
+
+  - {id: location:la-office, type: Location, name: Office, address: "1180 S. Alvarado St., Los Angeles, CA (fictional)", synthetic: true}
+
+  - id: policy:gl-wbm-4471902
+    type: Policy
+    line: Commercial General Liability
+    number: WBM-GL-4471902
+    effective: "2026-03-01"
+    expires: "2027-03-01"
+    limits: {per_occurrence: 1000000, aggregate: 2000000, products_completed_ops_aggregate: 2000000}
+    synthetic: true
+  - id: policy:auto-cai-220871
+    type: Policy
+    line: Commercial Auto
+    number: CAI-BA-220871
+    effective: "2026-03-01"
+    expires: "2027-03-01"
+    limits: {combined_single_limit: 1000000}
+    vehicles: 3
+    synthetic: true
+  - id: policy:wc-tvc-90314
+    type: Policy
+    line: Workers' Compensation
+    number: TVC-WC-90314
+    effective: "2026-03-01"
+    expires: "2027-03-01"
+    limits: {employers_liability_each_accident: 1000000}
+    synthetic: true
+
+  - {id: coverage:gl-reyes, type: Coverage, name: "CGL Coverage A and B (occurrence)"}
+
+  # Underwriting file, written at the 2024 new-business submission
+  - {id: uf:reyes-design-work, type: UnderwritingFact, topic: design_work, value: false, text: "No design work; subcontracts all electrical and plumbing.", as_of: "2024-08-14", source: underwriting file}
+  - {id: uf:reyes-locations, type: UnderwritingFact, topic: locations, value: [location:la-office], text: "One location: office, Los Angeles.", as_of: "2024-08-14", source: underwriting file}
+  - {id: uf:reyes-employees, type: UnderwritingFact, topic: employees, value: 18, text: "18 employees.", as_of: "2024-08-14", source: underwriting file}
+
+  # The property manager's contract Marisol is calling about (she emailed it ahead of the call)
+  - {id: contract:larchmont-msa, type: Contract, name: Larchmont Property Group master services agreement, counterparty: Larchmont Property Group (fictional), synthetic: true}
+
+edges:
+  - {type: SERVICED_BY, from: client:reyes-design-build, to: agency:pacific-crest}
+  - {type: IN, from: client:reyes-design-build, to: industry:236220}
+  - {type: HOME_STATE, from: client:reyes-design-build, to: state:CA}
+  - {type: OPERATES_AT, from: client:reyes-design-build, to: location:la-office}
+
+  - {type: HAS, from: client:reyes-design-build, to: policy:gl-wbm-4471902}
+  - {type: HAS, from: client:reyes-design-build, to: policy:auto-cai-220871}
+  - {type: HAS, from: client:reyes-design-build, to: policy:wc-tvc-90314}
+  - {type: WRITTEN_BY, from: policy:gl-wbm-4471902, to: carrier:westbrook-mutual}
+  - {type: WRITTEN_BY, from: policy:auto-cai-220871, to: carrier:coastline-auto}
+  - {type: WRITTEN_BY, from: policy:wc-tvc-90314, to: carrier:tri-valley-comp}
+
+  - {type: COVERS, from: policy:gl-wbm-4471902, to: location:la-office}
+  - {type: HAS_COVERAGE, from: policy:gl-wbm-4471902, to: coverage:gl-reyes}
+
+  # Forms actually attached to the GL. CG 20 37 and CG 20 01 are not.
+  - {type: ATTACHES, from: policy:gl-wbm-4471902, to: form:CG2033, schedule: "Automatic: any party you agree in a written construction agreement to add", automatic: true}
+  - {type: ATTACHES, from: policy:gl-wbm-4471902, to: form:CG2404, schedule: "Scheduled parties only", scheduled_parties: []}
+  - {type: ATTACHES, from: policy:gl-wbm-4471902, to: form:CG2279}
+  - {type: EXCLUDES, from: coverage:gl-reyes, to: exposure:professional-services, via_form: CG 22 79}
+
+  - {type: ABOUT, from: uf:reyes-design-work, to: client:reyes-design-build}
+  - {type: ABOUT, from: uf:reyes-locations, to: client:reyes-design-build}
+  - {type: ABOUT, from: uf:reyes-employees, to: client:reyes-design-build}
+
+  - {type: PARTY_TO, from: client:reyes-design-build, to: contract:larchmont-msa}
+  - {type: REQUIRES, from: contract:larchmont-msa, to: req:ai-ongoing}
+  - {type: REQUIRES, from: contract:larchmont-msa, to: req:ai-completed}
+  - {type: REQUIRES, from: contract:larchmont-msa, to: req:primary-noncontributory}
+  - {type: REQUIRES, from: contract:larchmont-msa, to: req:waiver-subrogation}

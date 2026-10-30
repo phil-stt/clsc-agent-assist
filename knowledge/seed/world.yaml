@@ -1,0 +1,145 @@
+# SYNTHETIC DATA. The agency, carriers and every figure here are fictional.
+# Statute citations are real and point at public text; see knowledge/docs/.
+
+nodes:
+  - id: agency:pacific-crest
+    type: Agency
+    name: Pacific Crest Insurance Services
+    city: Los Angeles
+    license: broker-agent
+    charges_broker_fee_on: [non-admitted]
+    synthetic: true
+
+  - id: state:CA
+    type: State
+    name: California
+    consent: two-party
+
+  - id: industry:236220
+    type: Industry
+    naics: "236220"
+    name: Commercial and Institutional Building Construction
+
+  # Carriers (fictional)
+  - {id: carrier:westbrook-mutual, type: Carrier, name: Westbrook Mutual, market: admitted, synthetic: true}
+  - {id: carrier:coastline-auto, type: Carrier, name: Coastline Auto Insurance Co., market: admitted, synthetic: true}
+  - {id: carrier:tri-valley-comp, type: Carrier, name: Tri-Valley Compensation Mutual, market: admitted, synthetic: true}
+  - {id: carrier:harborline-specialty, type: Carrier, name: Harborline Specialty Insurance Co., market: non-admitted, synthetic: true}
+  - {id: carrier:meridian-surplus, type: Carrier, name: Meridian Surplus Underwriters, market: non-admitted, synthetic: true}
+
+  # Markets, scoped by state
+  - {id: market:ca-admitted, type: Market, name: Admitted (California), kind: admitted, state: CA}
+  - {id: market:ca-non-admitted, type: Market, name: Non-admitted / surplus lines (California), kind: non-admitted, state: CA}
+
+  # Disclosures. Text lives in knowledge/disclosures/<file>; the app reads it, never writes it.
+  - {id: disclosure:ca-recorded-line, type: Disclosure, name: Recorded-line notice, file: ca-recorded-line.md, beat: greeting}
+  - {id: disclosure:ca-d1, type: Disclosure, name: California surplus lines disclosure (D-1), file: ca-d1.md, beat: quote, signature_required: true}
+  - {id: disclosure:ca-broker-fee, type: Disclosure, name: Broker fee disclosure, file: ca-broker-fee.md, beat: quote}
+
+  # Rules
+  - id: rule:ca-industrial-insured
+    type: Rule
+    name: Industrial insured exemption from the D-1 signature
+    citation: Cal. Ins. Code §1764.1(c)(1)
+    min_employees: 25
+    min_annual_premium: 25000
+    note: Both tests must be met. An industrial insured still receives the notice on the confirmation, certificate of placement or policy; only the signature is waived.
+
+  - id: rule:certificate-representation
+    type: Rule
+    name: A certificate may only show what the policy's attached forms support
+    citation: Cal. Ins. Code §384(a); agency E&O standard
+    human_only: true
+    note: A certificate does not amend, extend or alter the coverage afforded by the policy. Issuing one is a licensed human's act.
+
+  # Contract requirement kinds (the four clauses a construction contract usually asks for)
+  - {id: req:ai-ongoing, type: ContractRequirement, name: "Additional insured, ongoing operations"}
+  - {id: req:ai-completed, type: ContractRequirement, name: "Additional insured, completed operations"}
+  - {id: req:primary-noncontributory, type: ContractRequirement, name: "Primary and noncontributory"}
+  - {id: req:waiver-subrogation, type: ContractRequirement, name: "Waiver of subrogation"}
+
+  # ISO forms (stand-in text in knowledge/docs/forms/)
+  - {id: form:CG2010, type: Form, number: CG 20 10, name: "Additional Insured – Owners, Lessees or Contractors – Scheduled Person or Organization", doc: forms/cg-20-10.md}
+  - {id: form:CG2033, type: Form, number: CG 20 33, name: "Additional Insured – Owners, Lessees or Contractors – Automatic Status When Required in Construction Agreement With You", doc: forms/cg-20-33.md}
+  - {id: form:CG2037, type: Form, number: CG 20 37, name: "Additional Insured – Owners, Lessees or Contractors – Completed Operations", doc: forms/cg-20-37.md}
+  - {id: form:CG2001, type: Form, number: CG 20 01, name: "Primary and Noncontributory – Other Insurance Condition", doc: forms/cg-20-01.md}
+  - {id: form:CG2404, type: Form, number: CG 24 04, name: "Waiver of Transfer of Rights of Recovery Against Others to Us", doc: forms/cg-24-04.md}
+  - {id: form:CG2279, type: Form, number: CG 22 79, name: "Exclusion – Contractors – Professional Liability", doc: forms/cg-22-79.md}
+
+  # Exposures
+  - {id: exposure:professional-services, type: Exposure, name: Professional services (design, specifications, drawings)}
+  - {id: exposure:cyber, type: Exposure, name: Network security and privacy}
+  - {id: exposure:non-owned-auto, type: Exposure, name: Hired and non-owned autos}
+
+  # Product library (product sheets in knowledge/docs/products/)
+  - id: product:cgl
+    type: Product
+    name: Commercial General Liability
+    naics_prefixes: ["23"]
+    revenue_band: [0, 50000000]
+    summary: Bodily injury, property damage and personal and advertising injury arising from premises and operations, with the endorsement set above.
+    doc: products/cgl.md
+  - id: product:cpl
+    type: Product
+    name: Contractors Professional Liability
+    naics_prefixes: ["2362", "2371", "2381"]
+    revenue_band: [1000000, 100000000]
+    summary: Claims arising from design, design-build, specification and construction management services the contractor performs or subcontracts. Fills the gap the GL professional services exclusion leaves.
+    doc: products/contractors-professional-liability.md
+  - id: product:cyber
+    type: Product
+    name: Cyber Liability
+    naics_prefixes: ["23", "54"]
+    revenue_band: [0, 50000000]
+    summary: First-party breach response and third-party privacy and network security liability.
+    doc: products/cyber.md
+  - id: product:hnoa
+    type: Product
+    name: Hired and Non-Owned Auto
+    naics_prefixes: ["23"]
+    revenue_band: [0, 50000000]
+    summary: Liability for autos the business rents or that employees drive on company business.
+    doc: products/hnoa.md
+  - id: product:umbrella
+    type: Product
+    name: Commercial Umbrella
+    naics_prefixes: ["23"]
+    revenue_band: [500000, 100000000]
+    summary: Excess limits over GL, auto and employers liability.
+    doc: products/umbrella.md
+
+edges:
+  # Forms answer contract requirements
+  - {type: SATISFIES, from: form:CG2010, to: req:ai-ongoing, condition: party named in the schedule}
+  - {type: SATISFIES, from: form:CG2033, to: req:ai-ongoing, condition: written construction agreement requires it}
+  - {type: SATISFIES, from: form:CG2037, to: req:ai-completed, condition: party named in the schedule}
+  - {type: SATISFIES, from: form:CG2001, to: req:primary-noncontributory, condition: written contract requires it}
+  - {type: SATISFIES, from: form:CG2404, to: req:waiver-subrogation, condition: party named in the schedule}
+
+  # Product placement, scoped by state and industry
+  - {type: PLACED_IN, from: product:cgl, to: market:ca-admitted, state: CA, naics_prefixes: ["23"]}
+  - {type: PLACED_IN, from: product:cpl, to: market:ca-non-admitted, state: CA, naics_prefixes: ["2362", "2371", "2381"]}
+  - {type: PLACED_IN, from: product:cyber, to: market:ca-admitted, state: CA, naics_prefixes: ["23", "54"]}
+  - {type: PLACED_IN, from: product:cyber, to: market:ca-non-admitted, state: CA, naics_prefixes: ["23", "54"]}
+  - {type: PLACED_IN, from: product:hnoa, to: market:ca-admitted, state: CA, naics_prefixes: ["23"]}
+  - {type: PLACED_IN, from: product:umbrella, to: market:ca-admitted, state: CA, naics_prefixes: ["23"]}
+
+  - {type: OFFERED_BY, from: product:cpl, to: carrier:harborline-specialty}
+  - {type: OFFERED_BY, from: product:cpl, to: carrier:meridian-surplus}
+  - {type: OFFERED_BY, from: product:cyber, to: carrier:westbrook-mutual}
+  - {type: OFFERED_BY, from: product:cyber, to: carrier:harborline-specialty}
+
+  # Exposures and the products that answer them
+  - {type: ADDRESSED_BY, from: exposure:professional-services, to: product:cpl}
+  - {type: ADDRESSED_BY, from: exposure:cyber, to: product:cyber}
+  - {type: ADDRESSED_BY, from: exposure:non-owned-auto, to: product:hnoa}
+
+  # Disclosures
+  - {type: MANDATES, from: state:CA, to: disclosure:ca-recorded-line, when: call_start, citation: "Cal. Penal Code §632"}
+  - {type: TRIGGERS, from: market:ca-non-admitted, to: disclosure:ca-d1, state: CA, citation: "Cal. Ins. Code §1764.1"}
+  - {type: TRIGGERS, from: market:ca-non-admitted, to: disclosure:ca-broker-fee, state: CA, condition: agency charges a broker fee on the placement, citation: "Cal. Ins. Code §1623(a)(3)"}
+  - {type: EXEMPT_WHEN, from: disclosure:ca-d1, to: rule:ca-industrial-insured, waives: signature}
+
+  # Rules in force
+  - {type: APPLIES_IN, from: rule:ca-industrial-insured, to: state:CA}
+  - {type: APPLIES_IN, from: rule:certificate-representation, to: state:CA}
