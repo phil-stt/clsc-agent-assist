@@ -13,6 +13,7 @@ HX = {"HX-Request": "true"}
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("CLSC_DB", str(tmp_path / "state.db"))
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)  # tests replay the cache; they never spend
     from app.main import app
     c = TestClient(app)
     c.post("/restart", headers=HX)

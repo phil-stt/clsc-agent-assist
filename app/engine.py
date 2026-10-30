@@ -49,6 +49,11 @@ def detection(state: dict, n: int) -> dict | None:
     return state["detections"].get(str(n))
 
 
+def new_locations(r: dict) -> list[dict]:
+    """Locations count as observed only on the beat that reports the change, not when the agent restates it at wrap."""
+    return r["locations"] if r["intent"] == "location_change" else []
+
+
 def world(state: dict) -> nx.MultiDiGraph:
     """The graph as it stands at this point in the call, observations included."""
     g = base_graph().copy()
@@ -56,7 +61,7 @@ def world(state: dict) -> nx.MultiDiGraph:
         d = detection(state, n)
         if not d:
             continue
-        for loc in d["result"]["locations"]:
+        for loc in new_locations(d["result"]):
             slug = re.sub(r"[^a-z0-9]+", "-", loc["name"].lower()).strip("-")
             kg.observe_location(g, client(), slug, loc["name"], since=loc["when"])
         if "exposure:professional-services" in d["result"]["exposures"] and d["result"]["intent"] == "operations_change":
@@ -99,7 +104,7 @@ def _log_beat(state: dict, beat: dict, d: dict) -> None:
         a = q.certificate_check(world(state), client(), contract())
         if not a.answer["can_issue"]:
             st.log(state, "ai", "amber", "block", "Certificate blocked: " + a.answer["reason"], path=a.path.edges)
-    for loc in r["locations"]:
+    for loc in new_locations(r):
         st.log(state, "ai", "blue", "detect", f"{who}: new location mentioned, {loc['name']} ({loc['when']}).", source=src)
     for exp in r["exposures"]:
         if r["intent"] == "operations_change":
