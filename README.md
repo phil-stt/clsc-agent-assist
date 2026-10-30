@@ -85,6 +85,10 @@ Built: Phase 1, the call (this prototype), and the first half of Phase 2, the re
 - **Phase 3: A second home state.** Add another state's disclosure rules to the graph, through the review screen, and show the disclosure beat change with no change to the call flow. This is the test that the knowledge layer, not the call script, carries the compliance.
 - **Phase 4: Live audio and a real AMS.** Speech-to-text in place of the script, and read access to an agency management system and carrier forms. Last, because it's integration work that only pays off once the layer above it is trusted.
 
+## How it was built
+
+The prototype was built as a split between a product-manager role and an engineering role, each an AI agent working with a human who approved every step. The product manager wrote the build contracts and the engineer built to them; [`docs/work-order-001.md`](docs/work-order-001.md) and [`docs/work-order-002.md`](docs/work-order-002.md) are those contracts, kept as the record.
+
 ## Status
 
 Prototype. The full eleven-beat call and the review screen work end to end, with 31 tests green.
