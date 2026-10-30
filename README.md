@@ -4,7 +4,7 @@
 
 Spotter is an AI co-pilot for a commercial lines account manager on a live service call. One scripted eleven-minute call plays on the left. On the right, the co-pilot pulls the account, reads the endorsements actually attached to the policy, blocks a certificate the policy can't support, catches an unreported location and a professional liability exposure, surfaces the exact surplus lines disclosure when the agent moves to quote, blocks the quote until it's delivered, and drafts the after-call work for the agent to review. A knowledge graph sits behind every grounded answer, and each answer can show the path it walked.
 
-**Presentation:** [deck link]
+**Presentation:** [live deck](https://claude.ai/artifact/KmkigwbP1h1x8Y93cz4gnc) · [PDF](docs/spotter-deck.pdf)
 
 The problem, the scenario and the human-in-the-loop table are in [`docs/design-brief.md`](docs/design-brief.md). The architecture decision and the competency questions are in [`docs/knowledge-layer.md`](docs/knowledge-layer.md). The build contract is in [`docs/work-order-001.md`](docs/work-order-001.md).
 
@@ -13,6 +13,7 @@ The problem, the scenario and the human-in-the-loop table are in [`docs/design-b
 Requires Python 3.12 and `make`.
 
 ```bash
+git clone https://github.com/phil-stt/clsc-agent-assist.git && cd clsc-agent-assist
 make dev        # one command: creates .venv, installs pinned deps, builds the review queue and the graph, serves http://localhost:8000
 ```
 
@@ -74,7 +75,7 @@ The design brief's table, and what the UI does about each column. Three visual s
 - **The agency management system and the carrier.** The account, policies and attached forms are seed YAML. The endorsement request and the quote request go nowhere; the demo stops at accepted drafts and a logged click.
 - **The form library and product sheets.** Short paraphrased stand-ins, not ISO or carrier wording.
 - **The recorded-line greeting and the broker fee disclosure** are fictional agency text. The D-1 is the statutory notice text.
-- **Statutes** are quoted from a public copy of the California codes current as of 2026-01-01 and should be checked against the official text before anyone relies on them. Where the statute is narrower than common practice, the graph follows the statute: §1623 requires the broker fee in a signed written agreement, §384 requires the certificate disclaimer, and the industrial-insured exemption waives the D-1 signature, not the notice.
+- **Statutes** are quoted from a public copy of the California codes current as of 2026-01-01, and were checked against the official text at leginfo.legislature.ca.gov on 2026-10-30. They are cited to show the shape of the compliance problem, not as legal advice. Where the statute is narrower than common practice, the graph follows the statute: §1623 requires the broker fee in a signed written agreement, §384 requires the certificate disclaimer, and the industrial-insured exemption waives the D-1 signature, not the notice.
 - **Model responses** are recorded. A fresh key re-records only prompts that changed.
 
 ## Roadmap

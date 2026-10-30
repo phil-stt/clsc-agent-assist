@@ -2,7 +2,7 @@
 title: California surplus lines disclosure (D-1), application version
 owner: compliance
 citation: "Cal. Ins. Code §1764.1(b)"
-source: "Statutory notice text as published (FindLaw copy of the California Insurance Code, current as of 2026-01-01; verify against leginfo.legislature.ca.gov before relying on it). Bracketed language resolved to the application form, as §1764.1(b) directs."
+source: "Statutory notice text as published (FindLaw copy of the California Insurance Code, current as of 2026-01-01; checked against leginfo.legislature.ca.gov on 2026-10-30). Bracketed language resolved to the application form, as §1764.1(b) directs."
 deliver: Freestanding document in boldface 16-point type, signed by the applicant at application. Not subject to a limited power of attorney.
 signature_required: true
 cancellation_right: "If coverage was bound before the applicant received and signed this form, the applicant may cancel within five days of receiving it; premium prorated, any broker fee returned (§1764.1(a)(2), (d)(2))."
