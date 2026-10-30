@@ -1,0 +1,19 @@
+{
+  "prompt": {
+    "model": "claude-opus-5-5",
+    "version": "extract-v1",
+    "system": "You read one document from an insurance agency's knowledge corpus (a policy form summary, a product sheet, or a statute excerpt) and propose relationships for the agency's knowledge graph.\n\nYou get the edge types you may propose, each with the node types it connects, and the catalog of nodes that already exist. Propose an edge only when this document states the relationship. Use only node ids from the catalog. Don't propose edges the document merely makes plausible.\n\nFor each edge give:\n- condition: the condition the document attaches to it, in a short phrase, or \"\" if none.\n- evidence: a short exact quote from the document that states it.\n\nA person reviews every proposal before it enters the graph. Fewer, well-evidenced edges beat many guesses. Return an empty list if the document states none.",
+    "user": "Edge types:\n- ADDRESSED_BY: Exposure -> Product\n- APPLIES_IN: Rule -> State\n- EXEMPT_WHEN: Disclosure -> Rule\n- MANDATES: State -> Disclosure\n- OFFERED_BY: Product -> Carrier\n- PLACED_IN: Product -> Market\n- SATISFIES: Form -> ContractRequirement\n- TRIGGERS: Market -> Disclosure\n\nNode catalog:\n- carrier:coastline-auto (Carrier): Coastline Auto Insurance Co.\n- carrier:harborline-specialty (Carrier): Harborline Specialty Insurance Co.\n- carrier:meridian-surplus (Carrier): Meridian Surplus Underwriters\n- carrier:tri-valley-comp (Carrier): Tri-Valley Compensation Mutual\n- carrier:westbrook-mutual (Carrier): Westbrook Mutual\n- disclosure:ca-broker-fee (Disclosure): Broker fee disclosure\n- disclosure:ca-d1 (Disclosure): California surplus lines disclosure (D-1)\n- disclosure:ca-recorded-line (Disclosure): Recorded-line notice\n- exposure:cyber (Exposure): Network security and privacy\n- exposure:non-owned-auto (Exposure): Hired and non-owned autos\n- exposure:professional-services (Exposure): Professional services (design, specifications, drawings)\n- form:CG2001 (Form): CG 20 01\n- form:CG2010 (Form): CG 20 10\n- form:CG2033 (Form): CG 20 33\n- form:CG2037 (Form): CG 20 37\n- form:CG2279 (Form): CG 22 79\n- form:CG2404 (Form): CG 24 04\n- market:ca-admitted (Market): Admitted (California)\n- market:ca-non-admitted (Market): Non-admitted / surplus lines (California)\n- product:cgl (Product): Commercial General Liability\n- product:cpl (Product): Contractors Professional Liability\n- product:cyber (Product): Cyber Liability\n- product:hnoa (Product): Hired and Non-Owned Auto\n- product:umbrella (Product): Commercial Umbrella\n- req:ai-completed (ContractRequirement): Additional insured, completed operations\n- req:ai-ongoing (ContractRequirement): Additional insured, ongoing operations\n- req:primary-noncontributory (ContractRequirement): Primary and noncontributory\n- req:waiver-subrogation (ContractRequirement): Waiver of subrogation\n- rule:ca-industrial-insured (Rule): Industrial insured exemption from the D-1 signature\n- rule:certificate-representation (Rule): A certificate may only show what the policy's attached forms support\n- state:CA (State): California\n\nDocument (docs/statutes/ca-penal-632.md):\n\n# Cal. Penal Code \u00a7632: recording confidential communications (summary)\n*Summary for the demo; consult the statute for its text.*\n\nCalifornia requires the consent of all parties to record a confidential communication. Agencies satisfy this with a recorded-line notice at the top of the call; the approved wording is in `knowledge/disclosures/ca-recorded-line.md`.\n"
+  },
+  "result": {
+    "edges": [
+      {
+        "type": "MANDATES",
+        "from": "state:CA",
+        "to": "disclosure:ca-recorded-line",
+        "condition": "when recording a confidential communication",
+        "evidence": "Agencies satisfy this with a recorded-line notice at the top of the call"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "prompt": {
+    "model": "claude-opus-5-5",
+    "version": "detect-v1",
+    "system": "You follow a live phone call between a commercial lines account manager at an insurance agency and a business client, one utterance at a time. For the latest utterance, report what it signals. Only report what the utterance itself says; use the earlier lines for context only.\n\n- intent: what the latest line is doing in the call.\n- call_type: the kind of service call this is, once it is clear; \"none\" before then.\n- requirements: contract insurance requirements the speaker states, as ids. req:ai-ongoing = additional insured for ongoing operations; req:ai-completed = additional insured for completed operations; req:primary-noncontributory = primary and noncontributory; req:waiver-subrogation = waiver of subrogation.\n- locations: business premises the client mentions that are new or changed, with when they started.\n- exposures: loss exposures the line reveals, as ids. exposure:professional-services = design, engineering, drawings or specifications the business performs; exposure:cyber = data, networks, privacy; exposure:non-owned-auto = employees driving personal or rented vehicles for work.\n- evidence: the shortest phrase from the latest line that supports your answer.\n\nYou are not deciding coverage, products or disclosures. Report signals only.",
+    "user": "Earlier in the call:\n[05:25] CLIENT: And we've started doing some of the design in-house now. We hired an architect in August so we can bid design-build jobs ourselves.\n[06:50] AGENT: That's a big change, and your general liability won't respond to a design error. There's a policy built for exactly that. Let me get you a quote on contractors professional liability.\n[08:10] CLIENT: Sure, go ahead and get me a number.\n\nLatest utterance:\n[09:20] CLIENT: Actually, let me think about it. Can you send me something in writing and I'll look at it this weekend?"
+  },
+  "result": {
+    "intent": "decline",
+    "call_type": "endorsement",
+    "requirements": [],
+    "locations": [],
+    "exposures": [],
+    "evidence": "let me think about it"
+  }
+}

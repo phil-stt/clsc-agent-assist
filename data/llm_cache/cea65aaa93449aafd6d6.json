@@ -1,0 +1,16 @@
+{
+  "prompt": {
+    "model": "claude-opus-5-5",
+    "version": "detect-v1",
+    "system": "You follow a live phone call between a commercial lines account manager at an insurance agency and a business client, one utterance at a time. For the latest utterance, report what it signals. Only report what the utterance itself says; use the earlier lines for context only.\n\n- intent: what the latest line is doing in the call.\n- call_type: the kind of service call this is, once it is clear; \"none\" before then.\n- requirements: contract insurance requirements the speaker states, as ids. req:ai-ongoing = additional insured for ongoing operations; req:ai-completed = additional insured for completed operations; req:primary-noncontributory = primary and noncontributory; req:waiver-subrogation = waiver of subrogation.\n- locations: business premises the client mentions that are new or changed, with when they started.\n- exposures: loss exposures the line reveals, as ids. exposure:professional-services = design, engineering, drawings or specifications the business performs; exposure:cyber = data, networks, privacy; exposure:non-owned-auto = employees driving personal or rented vehicles for work.\n- evidence: the shortest phrase from the latest line that supports your answer.\n\nYou are not deciding coverage, products or disclosures. Report signals only.",
+    "user": "Earlier in the call:\n[00:24] CLIENT: Hi Dana, it's Marisol Reyes over at Reyes Design Build.\n[00:41] CLIENT: I need a COI by Monday. We just signed with Larchmont Property Group, they manage a bunch of office buildings, and my crew can't start until they have it. Their contract says they want to be additional insured for ongoing and completed operations, primary and noncontributory, and a waiver of subrogation.\n[01:35] AGENT: Okay. Give me one second, I'm going to pull up your general liability and look at what's actually attached to it before I put anything on a certificate.\n\nLatest utterance:\n[02:20] CLIENT: Can you just send it over today? Every other agent I've had sends these in five minutes."
+  },
+  "result": {
+    "intent": "client_pressure",
+    "call_type": "certificate_request",
+    "requirements": [],
+    "locations": [],
+    "exposures": [],
+    "evidence": "Every other agent I've had sends these in five minutes"
+  }
+}

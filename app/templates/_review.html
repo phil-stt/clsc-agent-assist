@@ -1,0 +1,71 @@
+<div id="review" class="review">
+  {% if flash %}
+  <div class="flash tone-{{ flash.tone }}" role="alert"><strong>{{ flash.title }}.</strong> {{ flash.text }}</div>
+  {% endif %}
+
+  <section class="review-head">
+    <h1>Edges Claude proposed from the documents</h1>
+    <p class="muted">Nothing here is in the graph until it's decided. Compliance-bearing edges wait for a person; plain data edges are approved automatically and tagged <span class="tag auto">auto</span>. Every decision is appended to <code>knowledge/approvals.json</code> and the graph is rebuilt.</p>
+    <dl class="stats">
+      <div><dt>Proposals</dt><dd>{{ counts['total'] }}</dd></div>
+      <div><dt>Waited for a person</dt><dd>{{ counts['waited'] }}</dd></div>
+      <div><dt>Auto-approved</dt><dd>{{ counts['auto'] }}</dd></div>
+      <div><dt>Decided by the reviewer</dt><dd>{{ counts['by_person'] }}</dd></div>
+      <div><dt>Pending</dt><dd>{{ counts['pending'] }}</dd></div>
+    </dl>
+    <p class="filters">Show: {% for f, label in [('', 'all'), ('forms', 'forms'), ('products', 'products'), ('statutes', 'statutes')] %}<a href="/review{{ '?doc=' ~ f if f }}" class="{{ 'on' if f == doc_filter }}">{{ label }}</a>{% endfor %}</p>
+  </section>
+
+  {% for doc, rows in groups.items() %}
+  <section class="doc">
+    <h2>{{ doc }}</h2>
+    {% for p in rows %}
+    <article class="prop tone-{{ p.tone }}" id="prop-{{ p.id }}">
+      <div class="prop-edge">
+        <span class="node">{{ p.from_label }}</span>
+        <span class="edge {{ 'gated' if p.requires_approval }}">{{ p.type }}</span>
+        <span class="node">{{ p.to_label }}</span>
+        {% if p.condition %}<span class="muted">· {{ p.condition }}</span>{% endif %}
+        {% if p.requires_approval %}<span class="tag person">needs a person</span>{% else %}<span class="tag auto">auto</span>{% endif %}
+      </div>
+      <p class="quote"><q>{{ p.evidence }}</q></p>
+      <p class="checks">
+        <span class="{{ 'ok' if p.schema_ok else 'gap' }}">{{ '✓ schema' if p.schema_ok else '✗ schema: ' ~ p.schema_problem }}</span>
+        <span class="{{ 'ok' if p.evidence_found else 'gap' }}">{{ '✓ quote found in the document' if p.evidence_found else '✗ quote not found in the document' }}</span>
+        {% if p.match.kind == 'matches' %}<span>matches curated edge</span>
+        {% elif p.match.kind == 'overlaps' %}<span class="conflict">overlaps {{ p.match_label }}</span>
+        {% else %}<span>new edge</span>{% endif %}
+        <span class="muted">{{ p.id }}</span>
+      </p>
+      {% if p.status == 'pending' %}
+      <div class="actions">
+        {% if p.match.kind == 'overlaps' %}
+        <button hx-post="/review/{{ p.id }}/merge" class="decide">Merge into {{ p.match.edge.split(':')[1] }} (keep the curated edge)</button>
+        {% endif %}
+        <button hx-post="/review/{{ p.id }}/approve" class="{{ '' if p.match.kind == 'overlaps' else 'decide' }}">Approve</button>
+        <button hx-post="/review/{{ p.id }}/reject">Reject</button>
+      </div>
+      {% else %}
+      {% set d = p.decision %}
+      <p class="decided-line tone-{{ p.tone }}">
+        {% if p.status == 'merged' %}✓ Merged into {{ p.merged_label }}; this shape is not added.
+        {% elif p.status == 'rejected' %}✗ Rejected; never enters the graph.
+        {% elif p.auto %}✓ Auto-approved (plain data).
+        {% else %}✓ Approved; in the graph.{% endif %}
+        <span class="muted">{{ d.reviewer }} · {{ d.at }} · #{{ d.seq }}</span>
+      </p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </section>
+  {% endfor %}
+
+  <details class="log review-log" open>
+    <summary>Decision record <span class="muted">({{ log|length }}, append-only)</span></summary>
+    <ol>
+      {% for r in log %}
+      <li class="ev tone-{{ 'amber' if r.action == 'reject' else 'green' }}"><span class="ev-beat">#{{ r.seq }}</span><span class="ev-actor">{{ r.action }}</span>{{ r.label }} · {{ r.reviewer }} · {{ r.at }} · {{ r.doc }}</li>
+      {% endfor %}
+    </ol>
+  </details>
+</div>
