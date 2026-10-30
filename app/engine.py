@@ -253,7 +253,13 @@ def decide_product(state: dict, status: str) -> dict:
 
 
 def request_quote(state: dict) -> tuple[dict, dict]:
-    """Human-only. A non-admitted submission is an application, and the D-1 is signed at application."""
+    """Human-only. A non-admitted submission is an application, and the D-1 is signed at application.
+
+    The gate sits on the quote request because a quote to a non-admitted market is the application
+    (Cal. Ins. Code §1764.1(a)(1): signature "at the time of accepting an application"). An agency
+    that gets indications before an application would move this check, unchanged, to the action
+    that submits the application.
+    """
     g = world(state)
     rec = recommendation(g, state)
     if not rec:
@@ -409,7 +415,32 @@ def path_view(g: nx.MultiDiGraph, path: q.Path) -> list[dict]:
     return rows
 
 
-def suggested_words(g: nx.MultiDiGraph, rows: list[dict]) -> str:
+WORDS_CAP = 50  # words; the agent reads this while the client waits. At most three sentences.
+
+SHORT_PHRASE = {"req:ai-ongoing": "additional insured for ongoing work",
+                "req:ai-completed": "completed operations",
+                "req:primary-noncontributory": "primary and noncontributory",
+                "req:waiver-subrogation": "the waiver of subrogation"}
+
+
+def suggested_words(g: nx.MultiDiGraph, rows: list[dict]) -> dict:
+    """What the agent can say: a short version to read on the call, and the full explanation behind a toggle."""
+    gaps = [SHORT_PHRASE[r["requirement"]] for r in rows if r["status"] == "unanswered"]
+    sched = [r for r in rows if r["status"] == "if_scheduled"]
+    if gaps:
+        short = (f"Your policy doesn't have {' or '.join(gaps)} yet, so I can't put "
+                 f"{'it' if len(gaps) == 1 else 'them'} on a certificate today. "
+                 "I'm asking Westbrook to add everything the contract needs right now. "
+                 "I'll send the certificate the moment they confirm.")
+    elif sched:
+        short = ("Larchmont needs to be added to your waiver schedule, and I'm asking Westbrook for that now. "
+                 "I'll send the certificate the moment they confirm.")
+    else:
+        short = "Everything the contract asks for is on your policy."
+    return {"short": short, "long": _long_words(rows)}
+
+
+def _long_words(rows: list[dict]) -> str:
     def phrase(r):
         return {"req:ai-ongoing": "additional insured while your crew is working",
                 "req:ai-completed": "additional insured after the job is finished (completed operations)",

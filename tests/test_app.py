@@ -136,3 +136,15 @@ def test_wrap_drafts_stay_in_review_until_accepted(client):
     assert re.search(r'class="card tone-green" id="card-draft-endorsement-request"', page)
     assert "Accepted by the agent with edits. Not sent" in page
     assert re.search(r'class="card tone-blue" id="card-draft-follow-up-email"', page)
+
+
+def test_suggested_words_fit_the_cap(client):
+    """The agent reads these while the client waits: three sentences, about fifty words, at most."""
+    from app.engine import WORDS_CAP
+    page = client.post("/jump/7", headers=HX).text
+    blocks = re.findall(r'<div class="words">\s*<span class="kicker">[^<]*</span>\s*<p>(.*?)</p>', page, re.S)
+    assert len(blocks) == 2  # the certificate's suggested words and the exposure's next best question
+    for text in map(html.unescape, blocks):
+        assert len(text.split()) <= WORDS_CAP, text
+        assert len(re.findall(r"[.?!](\s|$)", text)) <= 3, text
+    assert "Longer version" in page

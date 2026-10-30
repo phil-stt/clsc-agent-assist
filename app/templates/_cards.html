@@ -126,7 +126,8 @@
   <p class="cite">{{ a.citation }} · issuing a certificate is a licensed agent's act</p>
   <div class="words">
     <span class="kicker">Suggested words · AI recommends, you decide what to say</span>
-    <p>{{ card.words }}</p>
+    <p>{{ card.words.short }}</p>
+    <details class="longer"><summary>Longer version</summary><p>{{ card.words.long }}</p></details>
   </div>
   {{ path(card.path) }}
 

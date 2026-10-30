@@ -104,6 +104,8 @@ tr.st-unanswered { background: #fff3f2; }
 .reason { margin: 6px 0; }
 .words { background: var(--blue-bg); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
 .words p { margin: 4px 0 0; }
+.longer { margin-top: 6px; font-size: 13px; }
+.longer summary { cursor: pointer; color: var(--blue); font-weight: 600; }
 
 .path { margin-top: 10px; font-size: 12px; }
 .path summary { cursor: pointer; color: var(--blue); font-weight: 600; }
