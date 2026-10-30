@@ -4,8 +4,8 @@
 
   <header class="bar">
     <div class="brand">
-      <span class="brand-name">Pacific Crest Insurance Services</span>
-      <span class="brand-sub">Agent Assist · {{ call.agent.split(',')[0] }}</span>
+      <span class="brand-name">Spotter</span>
+      <span class="brand-sub">Pacific Crest Insurance Services · {{ call.agent.split(',')[0] }}</span>
     </div>
     <div class="call-meta">
       <span class="live {{ 'on' if s.playing else '' }}">{{ 'Playing' if s.playing else ('Call ended' if s.beat >= total else 'Paused') }}</span>

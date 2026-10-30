@@ -19,7 +19,7 @@ from app import engine, state as st
 ROOT = Path(__file__).resolve().parent
 TICK_SECONDS = 6
 
-app = FastAPI(title="Commercial lines agent assist (demo)")
+app = FastAPI(title="Spotter: agent assist for commercial lines service calls (demo)")
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 templates = Jinja2Templates(directory=ROOT / "templates")
 
